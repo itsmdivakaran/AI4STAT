@@ -1,0 +1,2211 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>AI for Statistical Analysis</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: fixed chapter rail on the left (desktop), drawer on mobile; single reading column ~70ch; highlighter-yellow marks key ideas like a marked-up report. */
+:root{
+  --paper:#F3F5F4; --surface:#FFFFFF; --ink:#16232E; --muted:#56636F; --line:#D6DDE2;
+  --accent:#1D4E89; --accent-soft:#E3ECF6; --mark:#F6D872; --mark-ink:#16232E;
+  --good:#1E7A4F; --good-soft:#E2F2EA; --warn:#A86A00; --warn-soft:#FBF0D9; --bad:#B23A30; --bad-soft:#F8E3E0;
+  --code-bg:#14212C; --code-ink:#E4EBF1; --code-muted:#8FA3B5;
+  --f-display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --f-body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --f-mono:"JetBrains Mono", ui-monospace, Consolas, monospace;
+  --rail:288px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#0E151C; --surface:#152029; --ink:#E5ECF1; --muted:#9AA9B5; --line:#26343F;
+  --accent:#86B6EE; --accent-soft:#1B2C3D; --mark:#6B5A1C; --mark-ink:#FFF6D6;
+  --good:#6FCF9E; --good-soft:#15302A; --warn:#E8B25A; --warn-soft:#352A14; --bad:#F08A80; --bad-soft:#3A1E1C;
+  --code-bg:#0A1016; --code-ink:#E4EBF1; --code-muted:#7F93A4; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#0E151C; --surface:#152029; --ink:#E5ECF1; --muted:#9AA9B5; --line:#26343F;
+  --accent:#86B6EE; --accent-soft:#1B2C3D; --mark:#6B5A1C; --mark-ink:#FFF6D6;
+  --good:#6FCF9E; --good-soft:#15302A; --warn:#E8B25A; --warn-soft:#352A14; --bad:#F08A80; --bad-soft:#3A1E1C;
+  --code-bg:#0A1016; --code-ink:#E4EBF1; --code-muted:#7F93A4; color-scheme:dark}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:72px}
+@media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}*{transition:none!important;animation:none!important}}
+body{background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:17px;line-height:1.65;
+  padding-left:max(0px, env(safe-area-inset-left,0px));padding-right:max(0px, env(safe-area-inset-right,0px))}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:60;background:var(--surface)}
+a{color:var(--accent)}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:4px}
+mark{background:linear-gradient(transparent 38%, var(--mark) 38%, var(--mark) 92%, transparent 92%);color:var(--mark-ink);padding:0 2px}
+
+/* progress */
+#progress{position:fixed;top:env(safe-area-inset-top,0px);left:0;height:3px;width:0;background:var(--accent);z-index:70}
+
+/* rail */
+.rail{position:fixed;top:0;bottom:0;left:0;width:calc(var(--rail) + env(safe-area-inset-left,0px));background:var(--surface);border-right:1px solid var(--line);
+  padding:calc(24px + env(safe-area-inset-top,0px)) 20px calc(24px + env(safe-area-inset-bottom,0px)) calc(20px + env(safe-area-inset-left,0px));
+  overflow-y:auto;z-index:50;display:flex;flex-direction:column;gap:20px}
+.brand{font-family:var(--f-display);font-weight:800;font-size:1.05rem;line-height:1.2;letter-spacing:-.01em}
+.brand small{display:block;font-family:var(--f-body);font-weight:400;font-size:.78rem;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin-top:4px}
+.toc{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+.toc a{display:grid;grid-template-columns:28px 1fr;gap:6px;align-items:baseline;padding:8px 10px;border-radius:8px;text-decoration:none;color:var(--ink);font-size:.93rem;line-height:1.35}
+.toc a span{font-family:var(--f-mono);font-size:.75rem;color:var(--muted)}
+.toc a:hover{background:var(--accent-soft)}
+.toc a.active{background:var(--accent-soft);color:var(--accent);font-weight:700}
+.toc a.active span{color:var(--accent)}
+.rail-foot{margin-top:auto;display:flex;flex-direction:column;gap:10px;font-size:.85rem;color:var(--muted)}
+.theme-btn{font:inherit;font-size:.85rem;background:transparent;color:var(--ink);border:1px solid var(--line);border-radius:999px;padding:6px 12px;cursor:pointer;align-self:flex-start}
+.theme-btn:hover{border-color:var(--accent)}
+
+/* mobile top bar */
+.topbar{display:none}
+@media (max-width: 960px){
+  .rail{transform:translateX(-105%);transition:transform .25s ease;box-shadow:0 0 40px rgba(0,0,0,.2)}
+  .rail.open{transform:none}
+  .topbar{display:flex;position:sticky;top:env(safe-area-inset-top,0px);z-index:40;background:var(--surface);border-bottom:1px solid var(--line);
+    align-items:center;justify-content:space-between;gap:12px;padding-block:10px;
+    padding-left:max(16px, env(safe-area-inset-left,0px));padding-right:max(16px, env(safe-area-inset-right,0px))}
+  .topbar b{font-family:var(--f-display);font-size:1rem}
+  .menu-btn{font:inherit;font-weight:700;background:var(--accent);color:var(--surface);border:0;border-radius:8px;padding:8px 14px;cursor:pointer}
+  .scrim{position:fixed;inset:0;background:rgba(10,16,22,.45);z-index:45}
+}
+
+/* main */
+main{margin-left:var(--rail);padding-left:max(16px, env(safe-area-inset-left,0px));padding-right:max(16px, env(safe-area-inset-right,0px));padding-block:0 80px}
+@media (max-width:960px){main{margin-left:0}}
+.col{max-width:760px;margin:0 auto}
+section.chapter{padding-block:56px 24px;border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:20px}
+section.chapter > *{margin:0}
+.eyebrow{font-family:var(--f-mono);font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;letter-spacing:-.015em;line-height:1.12}
+h1{font-size:clamp(2.2rem,5.4vw,3.6rem);font-weight:800;margin:0}
+h2{font-size:clamp(1.7rem,3.6vw,2.4rem);font-weight:800}
+h3{font-size:1.25rem;font-weight:700;margin:12px 0 0}
+p{max-width:68ch}
+.lead{font-size:1.15rem;color:var(--muted)}
+ul.plain{padding-left:1.2em;margin:0;display:flex;flex-direction:column;gap:6px}
+
+/* hero */
+.hero{padding-block:64px 40px;display:flex;flex-direction:column;gap:22px;border-bottom:1px solid var(--line)}
+.hero p{margin:0}
+.meta-row{display:flex;flex-wrap:wrap;gap:10px}
+.chip{font-size:.82rem;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:5px 12px;color:var(--muted)}
+.hero-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.hero-grid a{display:flex;flex-direction:column;gap:4px;padding:14px 16px;background:var(--surface);border:1px solid var(--line);border-radius:10px;text-decoration:none;color:var(--ink)}
+.hero-grid a:hover{border-color:var(--accent)}
+.hero-grid a span{font-family:var(--f-mono);font-size:.72rem;color:var(--accent)}
+.hero-grid a b{font-family:var(--f-display);font-size:1rem;line-height:1.25}
+
+/* callouts */
+.analogy{border-left:4px solid var(--mark);background:var(--surface);padding:16px 20px;border-radius:0 10px 10px 0}
+.analogy b{font-family:var(--f-display)}
+.note{padding:14px 18px;border-radius:10px;background:var(--accent-soft);font-size:.96rem}
+.note.warn{background:var(--warn-soft)}
+.note.bad{background:var(--bad-soft)}
+.label{font-family:var(--f-mono);font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;display:block;margin-bottom:4px;color:var(--muted)}
+
+/* tables */
+.tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:.95rem;min-width:520px}
+th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-family:var(--f-display);font-size:.9rem;background:var(--accent-soft)}
+tr:last-child td{border-bottom:0}
+
+/* steps */
+.steps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px;counter-reset:s}
+.steps li{display:grid;grid-template-columns:40px 1fr;gap:12px;align-items:start;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+.steps li::before{counter-increment:s;content:counter(s);font-family:var(--f-display);font-weight:800;font-size:1.2rem;width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:var(--accent);color:var(--surface)}
+.steps b{display:block}
+
+/* prompt cards */
+.prompt{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.prompt-head{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.prompt-head b{font-family:var(--f-display)}
+.prompt pre{margin:0;padding:16px;white-space:pre-wrap;word-break:break-word;font-family:var(--f-mono);font-size:.86rem;line-height:1.6;background:var(--paper)}
+.prompt pre .fill{background:var(--mark);color:var(--mark-ink);border-radius:3px;padding:0 3px}
+.prompt .why{padding:12px 16px;font-size:.92rem;color:var(--muted)}
+.btn{font:inherit;font-size:.88rem;font-weight:700;border:1px solid var(--accent);color:var(--accent);background:transparent;border-radius:8px;padding:6px 12px;cursor:pointer}
+.btn:hover{background:var(--accent-soft)}
+.btn.solid{background:var(--accent);color:var(--surface)}
+
+/* code explainer */
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
+.tab{font:inherit;font-size:.9rem;font-weight:700;padding:7px 14px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.tab[aria-selected="true"]{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+.explainer{border-radius:12px;overflow:hidden;border:1px solid var(--line)}
+.ex-row{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);border-bottom:1px solid var(--line)}
+.ex-row:last-child{border-bottom:0}
+.ex-code{background:var(--code-bg);color:var(--code-ink);font-family:var(--f-mono);font-size:.8rem;padding:10px 14px;overflow-x:auto;white-space:pre}
+.ex-say{background:var(--surface);padding:10px 14px;font-size:.92rem}
+@media (max-width:640px){.ex-row{grid-template-columns:1fr}}
+
+/* builder */
+.builder{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:20px;display:flex;flex-direction:column;gap:14px}
+.fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.field{display:flex;flex-direction:column;gap:4px;min-width:0}
+.field label{font-size:.85rem;font-weight:700}
+.field input,.field select,.field textarea{font:inherit;font-size:.95rem;padding:8px 10px;border-radius:8px;border:1px solid var(--line);background:var(--paper);color:var(--ink);width:100%}
+#builtPrompt{font-family:var(--f-mono);font-size:.84rem;min-height:220px;resize:vertical}
+
+/* mean/median demo */
+.demo{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:20px;display:flex;flex-direction:column;gap:14px}
+.demo input[type=range]{width:100%;accent-color:var(--accent)}
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.stat{padding:12px 14px;border-radius:10px;background:var(--paper)}
+.stat b{font-family:var(--f-display);font-size:1.6rem;font-variant-numeric:tabular-nums;display:block}
+.stat.mean b{color:var(--bad)} .stat.median b{color:var(--good)}
+#bars{width:100%;height:auto;display:block}
+
+/* concept cards */
+.concepts{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+.concept{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:6px}
+.concept h4{margin:0;font-family:var(--f-display);font-size:1.05rem}
+.concept p{margin:0;font-size:.94rem}
+.concept .ex{font-size:.88rem;color:var(--muted)}
+
+/* scenario */
+details.scenario{background:var(--surface);border:1px solid var(--line);border-radius:12px}
+details.scenario summary{cursor:pointer;padding:16px 18px;display:flex;gap:12px;align-items:baseline;list-style:none}
+details.scenario summary::-webkit-details-marker{display:none}
+details.scenario summary b{font-family:var(--f-display);font-size:1.15rem;line-height:1.25}
+details.scenario summary .tag{font-family:var(--f-mono);font-size:.72rem;color:var(--accent);white-space:nowrap}
+details.scenario summary::after{content:"+";margin-left:auto;font-family:var(--f-display);font-size:1.4rem;color:var(--accent)}
+details.scenario[open] summary::after{content:"–"}
+.sc-body{padding:0 18px 18px;display:flex;flex-direction:column;gap:12px}
+.sc-body p{margin:0}
+.finding{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
+.finding div{background:var(--paper);border-radius:8px;padding:10px 12px;font-size:.92rem}
+
+/* traffic light */
+.lights{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px}
+.light{border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:6px;border:1px solid var(--line)}
+.light h4{margin:0;font-family:var(--f-display);display:flex;align-items:center;gap:8px}
+.light h4::before{content:"";width:14px;height:14px;border-radius:50%;background:currentColor}
+.light.g{background:var(--good-soft)} .light.g h4{color:var(--good)}
+.light.a{background:var(--warn-soft)} .light.a h4{color:var(--warn)}
+.light.r{background:var(--bad-soft)} .light.r h4{color:var(--bad)}
+.light ul{margin:0;padding-left:1.1em;font-size:.92rem}
+
+/* checklist */
+.checklist{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:8px 18px}
+.checklist label{display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--line);cursor:pointer}
+.checklist label:last-of-type{border-bottom:0}
+.checklist input{width:20px;height:20px;margin-top:3px;accent-color:var(--good);flex:none}
+.checklist input:checked + span{color:var(--muted);text-decoration:line-through}
+.check-score{font-family:var(--f-mono);font-size:.85rem;color:var(--muted);padding:8px 0}
+
+/* quiz */
+.quiz{background:var(--accent-soft);border-radius:12px;padding:18px;display:flex;flex-direction:column;gap:10px}
+.quiz .q{font-weight:700}
+.quiz .opts{display:flex;flex-direction:column;gap:8px}
+.quiz button.opt{font:inherit;text-align:left;padding:10px 14px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.quiz button.opt:hover{border-color:var(--accent)}
+.quiz button.opt.right{border-color:var(--good);background:var(--good-soft)}
+.quiz button.opt.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.quiz .fb{font-size:.94rem;min-height:1.2em}
+
+/* glossary */
+.gloss-search{font:inherit;padding:10px 14px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);width:100%}
+dl.gloss{margin:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px}
+dl.gloss div{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+dl.gloss dt{font-family:var(--f-display);font-weight:700}
+dl.gloss dd{margin:2px 0 0;font-size:.93rem;color:var(--muted)}
+
+.pager{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.pager a{text-decoration:none;font-weight:700;font-size:.92rem}
+footer{padding-block:32px;color:var(--muted);font-size:.88rem}
+.byline{display:flex;gap:14px;align-items:center;padding:14px 16px;background:var(--surface);border:1px solid var(--line);border-radius:12px}
+.byline .mono{width:48px;height:48px;border-radius:50%;background:var(--accent);color:var(--surface);display:grid;place-items:center;font-family:var(--f-display);font-weight:800;font-size:1.1rem;flex:none}
+.byline div{display:flex;flex-direction:column;gap:2px;min-width:0}
+.byline b{font-family:var(--f-display);font-size:1.05rem}
+.byline span{font-size:.9rem;color:var(--muted);line-height:1.4}
+.rail-author{font-size:.82rem;line-height:1.4;color:var(--muted)}
+.rail-author b{color:var(--ink);display:block}
+.picker{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px;display:flex;flex-direction:column;gap:14px}
+.picker-row{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end}
+.picker-row .tabs{gap:6px}
+.picker-row .grp{display:flex;flex-direction:column;gap:6px}
+.setup{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px}
+.setup div{background:var(--paper);border-radius:8px;padding:10px 12px;font-size:.9rem;min-width:0}
+.setup code,.inline-code{font-family:var(--f-mono);font-size:.82rem;background:var(--accent-soft);padding:1px 5px;border-radius:4px;word-break:break-word}
+.env-panel{display:flex;flex-direction:column;gap:10px}
+.env-panel[hidden]{display:none}
+.qgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:8px}
+.qbtn{font:inherit;text-align:left;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);cursor:pointer;font-size:.93rem;line-height:1.35}
+.qbtn:hover{border-color:var(--accent)}
+.qbtn[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft);font-weight:700}
+.result{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+.result > div{min-width:0;font-size:.94rem}
+.result .wide{grid-column:1/-1}
+.result h4{margin:0;font-family:var(--f-display);font-size:1.2rem}
+.result pre{margin:6px 0 0;white-space:pre-wrap;font-family:var(--f-mono);font-size:.82rem;background:var(--paper);padding:10px 12px;border-radius:8px}
+.concept .spot{font-size:.88rem}
+.concept .fix{font-size:.88rem;border-top:1px dashed var(--line);padding-top:6px;margin-top:auto}
+.sev{font-family:var(--f-mono);font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;padding:2px 8px;border-radius:999px;align-self:flex-start}
+.sev.high{background:var(--bad-soft);color:var(--bad)} .sev.med{background:var(--warn-soft);color:var(--warn)}
+.chartbox{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:8px}
+.chartbox svg{width:100%;height:auto;display:block}
+.chartbox .cap{font-size:.88rem;color:var(--muted);margin:0}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:.85rem;color:var(--muted)}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+tr.flag td{background:var(--bad-soft)}
+.brief{background:var(--surface);border:1px solid var(--line);border-top:6px solid var(--accent);border-radius:4px;padding:22px 24px;display:flex;flex-direction:column;gap:10px;font-size:.95rem}
+.brief h4{margin:0;font-family:var(--f-display);font-size:1.15rem}
+.brief .bh{font-family:var(--f-mono);font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-top:6px}
+.brief p,.brief ul{margin:0}
+.brief ul{padding-left:1.2em}
+.sheet{background:var(--surface);border:2px solid var(--ink);border-radius:6px;padding:20px;display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px;font-size:.88rem;line-height:1.45}
+.sheet > div{min-width:0}
+.sheet h4{margin:0 0 6px;font-family:var(--f-display);font-size:1rem;border-bottom:2px solid var(--mark);padding-bottom:3px}
+.sheet ul{margin:0;padding-left:1.1em}
+.sheet .title{grid-column:1/-1;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;align-items:baseline}
+.sheet .title b{font-family:var(--f-display);font-size:1.25rem}
+/* --- setup guides: illustrated screens --- */
+:root{--ui-bg:#FFFFFF;--ui-panel:#F4F6F8;--ui-bar:#E7EBEF;--ui-line:#D3DAE0;--ui-ink:#1E2A33;--ui-mute:#6A7782;--ui-btn:#2F6FB3;--ui-btn-ink:#FFFFFF;--ui-term:#101820;--ui-term-ink:#D9E4EC;--ui-term-ok:#7FD4A3;--ui-term-dim:#7F93A4;--ui-add:#E3F4EA;--ui-del:#FBE6E4}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--ui-bg:#1A242D;--ui-panel:#202C36;--ui-bar:#141C23;--ui-line:#2E3C48;--ui-ink:#DCE5EC;--ui-mute:#8D9DAA;--ui-btn:#5C9BE0;--ui-btn-ink:#0E151C;--ui-term:#0A1016;--ui-term-ink:#D9E4EC;--ui-term-ok:#7FD4A3;--ui-term-dim:#73879A;--ui-add:#16322A;--ui-del:#3A1F1D}}
+:root[data-theme="dark"]{--ui-bg:#1A242D;--ui-panel:#202C36;--ui-bar:#141C23;--ui-line:#2E3C48;--ui-ink:#DCE5EC;--ui-mute:#8D9DAA;--ui-btn:#5C9BE0;--ui-btn-ink:#0E151C;--ui-term:#0A1016;--ui-term-ink:#D9E4EC;--ui-term-ok:#7FD4A3;--ui-term-dim:#73879A;--ui-add:#16322A;--ui-del:#3A1F1D}
+figure.shot{margin:0;display:flex;flex-direction:column;gap:8px}
+.shot-scroll{overflow-x:auto;border:1px solid var(--ui-line);border-radius:10px;background:var(--ui-bg);box-shadow:0 6px 22px rgba(20,33,44,.08)}
+.win{min-width:580px;color:var(--ui-ink);font-family:"Segoe UI",system-ui,sans-serif;font-size:12.5px;line-height:1.45}
+.win-bar{display:flex;align-items:center;gap:6px;padding:7px 12px;background:var(--ui-bar);border-bottom:1px solid var(--ui-line);color:var(--ui-mute);font-size:11.5px}
+.win-bar i{width:10px;height:10px;border-radius:50%;background:var(--ui-line);display:inline-block}
+.win-bar span{margin-left:8px}
+.win-tools{display:flex;align-items:center;gap:8px;padding:6px 12px;border-bottom:1px solid var(--ui-line);background:var(--ui-panel);color:var(--ui-mute);font-size:11.5px}
+.win-tools .sp{margin-left:auto}
+.ico{display:inline-grid;place-items:center;min-width:24px;height:22px;padding:0 5px;border-radius:5px;border:1px solid var(--ui-line);background:var(--ui-bg);color:var(--ui-ink);font-size:11px;font-weight:700}
+.win-body{display:grid;gap:0}
+.pane{padding:10px 12px;border-right:1px solid var(--ui-line);min-width:0}
+.pane:last-child{border-right:0}
+.pane h5{margin:0 0 6px;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ui-mute);font-weight:700}
+.codeline{font-family:var(--f-mono);font-size:11.5px;white-space:pre;color:var(--ui-ink)}
+.codeline .c{color:var(--ui-mute)}
+.ui-btn{display:inline-block;padding:6px 12px;border-radius:6px;background:var(--ui-btn);color:var(--ui-btn-ink);font-weight:700;font-size:12px}
+.ui-btn.ghost{background:transparent;color:var(--ui-btn);border:1px solid var(--ui-btn)}
+.ui-field{border:1px solid var(--ui-line);border-radius:6px;padding:6px 9px;background:var(--ui-bg);color:var(--ui-mute);font-family:var(--f-mono);font-size:11.5px}
+.ui-row{display:flex;align-items:center;gap:10px;padding:8px 10px;border-bottom:1px solid var(--ui-line)}
+.ui-row:last-child{border-bottom:0}
+.ui-row .grow{flex:1;min-width:0}
+.ui-row small{color:var(--ui-mute);display:block;font-size:11px}
+.ui-tag{font-size:10px;padding:1px 6px;border-radius:999px;border:1px solid var(--ui-line);color:var(--ui-mute)}
+.ui-tag.ok{border-color:var(--good);color:var(--good)}
+.bubble{padding:8px 10px;border-radius:8px;background:var(--ui-panel);margin-bottom:8px}
+.bubble.me{background:var(--accent-soft);margin-left:30px}
+.bubble b{display:block;font-size:10.5px;color:var(--ui-mute);text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px}
+.promptbox{border:1px solid var(--ui-line);border-radius:8px;padding:8px 10px;background:var(--ui-bg);display:flex;flex-direction:column;gap:6px}
+.promptbox .foot{display:flex;gap:8px;align-items:center;font-size:11px;color:var(--ui-mute);flex-wrap:wrap}
+.term{background:var(--ui-term);color:var(--ui-term-ink);font-family:var(--f-mono);font-size:11.5px;padding:12px 14px;white-space:pre;line-height:1.55}
+.term .ok{color:var(--ui-term-ok)} .term .dim{color:var(--ui-term-dim)}
+.diff{font-family:var(--f-mono);font-size:11.5px;white-space:pre}
+.diff .del{background:var(--ui-del);display:block;padding:0 8px}
+.diff .add{background:var(--ui-add);display:block;padding:0 8px}
+.diff .ctx{display:block;padding:0 8px}
+.modal{margin:16px auto;max-width:430px;border:1px solid var(--ui-line);border-radius:10px;background:var(--ui-bg);box-shadow:0 10px 30px rgba(0,0,0,.18)}
+.modal-h{padding:10px 12px;border-bottom:1px solid var(--ui-line);font-weight:700;display:flex;justify-content:space-between}
+.dim-bg{background:var(--ui-panel);padding:6px 0}
+.pin{display:inline-grid;place-items:center;width:21px;height:21px;border-radius:50%;background:var(--mark);color:var(--mark-ink);font:700 11px var(--f-mono);box-shadow:0 0 0 2px var(--ui-bg);vertical-align:middle;flex:none}
+.hl{outline:2.5px solid var(--mark);outline-offset:2px;border-radius:6px}
+figure.shot figcaption{font-size:.88rem;color:var(--muted);display:flex;flex-direction:column;gap:3px}
+figure.shot figcaption .pins{display:flex;flex-direction:column;gap:3px}
+figure.shot figcaption .pins > span{display:block;position:relative;padding-left:30px;min-height:22px}
+figure.shot figcaption .pins > span > .pin:first-child{position:absolute;left:0;top:0}
+.cmd{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--code-bg)}
+.cmd-h{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 10px 6px 14px;background:var(--surface);border-bottom:1px solid var(--line);font-size:.82rem;color:var(--muted);flex-wrap:wrap}
+.cmd pre{margin:0;padding:12px 14px;color:var(--code-ink);font-family:var(--f-mono);font-size:.82rem;line-height:1.6;overflow-x:auto;white-space:pre}
+.cmd pre .c{color:var(--code-muted)}
+.cmd .btn{padding:3px 10px;font-size:.8rem}
+.guide-tabs{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px}
+.guide-tabs .tab{text-align:left;padding:10px 12px;line-height:1.3}
+.guide-tabs .tab small{display:block;font-weight:400;font-size:.78rem;opacity:.85}
+.gpanel{display:flex;flex-direction:column;gap:18px}
+.gstep{display:grid;grid-template-columns:44px minmax(0,1fr);gap:14px;align-items:start}
+.gstep > .n{font-family:var(--f-display);font-weight:800;font-size:1.1rem;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:var(--accent);color:var(--surface)}
+.gstep > div{display:flex;flex-direction:column;gap:10px;min-width:0}
+.gstep h4{margin:6px 0 0;font-family:var(--f-display);font-size:1.08rem}
+.gstep p{margin:0}
+.need{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.need div{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:.92rem}
+@media (max-width:560px){.gstep{grid-template-columns:1fr}.gstep > .n{width:34px;height:34px;font-size:1rem}}
+</style>
+
+<div id="progress" aria-hidden="true"></div>
+
+<header class="topbar">
+  <b>AI for Statistical Analysis</b>
+  <button class="menu-btn" id="menuBtn" aria-expanded="false" aria-controls="rail">Chapters</button>
+</header>
+<div class="scrim" id="scrim" hidden></div>
+
+<nav class="rail" id="rail" aria-label="Chapters">
+  <div class="brand">AI for Statistical Analysis &amp; Interpretation<small>A handbook for public servants</small></div>
+  <ol class="toc" id="toc">
+    <li><a href="#start"><span>00</span>Start here</a></li>
+    <li><a href="#intro"><span>01</span>What AI is, and isn't</a></li>
+    <li><a href="#assistants"><span>02</span>Meet R and Python</a></li>
+    <li><a href="#setup"><span>03</span>Your first workspace</a></li>
+    <li><a href="#prompts"><span>04</span>How AI writes the code</a></li>
+    <li><a href="#choose"><span>05</span>Choosing the right analysis</a></li>
+    <li><a href="#numbers"><span>06</span>Making sense of the numbers</a></li>
+    <li><a href="#mistakes"><span>07</span>Common AI mistakes</a></li>
+    <li><a href="#survey"><span>08</span>Working with survey data</a></li>
+    <li><a href="#examples"><span>09</span>Government examples</a></li>
+    <li><a href="#worked"><span>10</span>Worked example</a></li>
+    <li><a href="#writeup"><span>11</span>Writing it up</a></li>
+    <li><a href="#safety"><span>12</span>Safety &amp; ethics</a></li>
+    <li><a href="#tools"><span>13</span>AI inside Jupyter, RStudio &amp; VS Code</a></li>
+    <li><a href="#guides"><span>14</span>Setup guides: Ollama, Gemini, ChatGPT, Claude</a></li>
+    <li><a href="#practice"><span>15</span>Practice exercises</a></li>
+    <li><a href="#reference"><span>16</span>Quick reference &amp; cheat sheet</a></li>
+  </ol>
+  <div class="rail-foot">
+    <div class="rail-author"><b>Mahesh Divakaran</b>Google &amp; IBM Certified Data Science Professional · Research Scholar in Statistics, Amity University Lucknow</div>
+    <span id="readStat">0% read</span>
+    <button class="theme-btn" id="themeBtn" type="button">Switch to dark</button>
+  </div>
+</nav>
+
+<main>
+<div class="col">
+
+<!-- HERO -->
+<section class="hero" id="start">
+  <span class="eyebrow">Handbook · Edition 1 · 2026</span>
+  <h1>AI for Statistical Analysis and Interpretation</h1>
+  <p class="lead">AI-assisted programming with R and Python, written for government staff who have never written a line of code and never want to memorise one.</p>
+  <div class="byline">
+    <span class="mono" aria-hidden="true">MD</span>
+    <div><b>Mahesh Divakaran</b><span>Google &amp; IBM Certified Data Science Professional<br>Research Scholar in Statistics, Amity University Lucknow</span></div>
+  </div>
+  <div class="meta-row">
+    <span class="chip">≈ 2 hr read</span>
+    <span class="chip">No maths required</span>
+    <span class="chip">16 chapters</span>
+    <span class="chip">Copy-ready prompts</span>
+  </div>
+  <p>You already know your department's work. You know which numbers matter, which complaints keep coming back, and which budget lines get questioned every year. This handbook gives you one new skill on top of that: <mark>asking an AI assistant to do the technical part, then checking that it did it properly.</mark></p>
+  <div class="hero-grid">
+    <a href="#prompts"><span>Jump to</span><b>Copy-paste prompt templates</b></a>
+    <a href="#builder"><span>Try it</span><b>Build your own prompt</b></a>
+    <a href="#numbers"><span>Decode</span><b>Statistics in plain English</b></a>
+    <a href="#guides"><span>Set up</span><b>Ollama, Gemini, ChatGPT &amp; Claude, step by step</b></a>
+    <a href="#worked"><span>Follow along</span><b>Worked example, start to finish</b></a>
+    <a href="#safety"><span>Before you start</span><b>What never to upload</b></a>
+  </div>
+  <div class="note"><span class="label">How to read this</span>Go in order if you're new. Each chapter ends with one quick question to check the idea stuck. Your progress and checklist ticks stay in this browser only.</div>
+</section>
+
+<!-- CH1 -->
+<section class="chapter" id="intro">
+  <span class="eyebrow">Chapter 01</span>
+  <h2>What is AI, and how is it changing government data work?</h2>
+  <p>"Artificial intelligence" sounds like science fiction. The AI tools you'll use in this handbook are much more ordinary than that. They are <b>language assistants</b>: programs that have read an enormous amount of text and learned to predict useful replies.</p>
+  <div class="analogy"><b>Think of it as a very well-read new colleague.</b> They've read every statistics textbook and programming manual, they never get tired, and they answer instantly. But it's their first week. They don't know your department, they sometimes sound confident when they're wrong, and you would never let them sign off a report without checking it.</div>
+  <h3>What changes for you</h3>
+  <p>Until recently, analysing a spreadsheet of 50,000 service requests meant either learning to program or waiting in a queue for the analytics team. Now you can describe what you want in normal sentences, and the AI writes the instructions (the "code") for the computer to follow.</p>
+  <div class="tbl-wrap"><table>
+    <tr><th>Before AI assistants</th><th>With AI assistants</th></tr>
+    <tr><td>Learn programming for months</td><td>Describe the task in plain sentences</td></tr>
+    <tr><td>Search forums for error messages</td><td>Paste the error and ask "what went wrong?"</td></tr>
+    <tr><td>Wait for an analyst to explain a result</td><td>Ask "what does this mean for my department?"</td></tr>
+    <tr><td>Excel struggles past ~1 million rows</td><td>R and Python handle millions of rows easily</td></tr>
+  </table></div>
+  <h3>Common myths</h3>
+  <div class="tbl-wrap"><table>
+    <tr><th>Myth</th><th>Reality</th></tr>
+    <tr><td>"AI understands my data."</td><td>It only sees what you show it. It guesses about the rest.</td></tr>
+    <tr><td>"AI is always right."</td><td>It can make mistakes and sound sure of itself. You check the work.</td></tr>
+    <tr><td>"AI will replace analysts."</td><td>It removes the typing, not the judgement. Your knowledge of context matters more, not less.</td></tr>
+    <tr><td>"I need to be technical."</td><td>You need to be clear. Clear instructions beat technical vocabulary.</td></tr>
+  </table></div>
+  <div class="quiz" data-quiz="q1"></div>
+</section>
+
+<!-- CH2 -->
+<section class="chapter" id="assistants">
+  <span class="eyebrow">Chapter 02</span>
+  <h2>Meet your new assistants: R and Python</h2>
+  <p>R and Python are <b>programming languages</b>. A programming language is just a strict way of writing instructions so a computer can follow them exactly, with no guessing.</p>
+  <div class="analogy"><b>A recipe for the computer.</b> Excel is like cooking by hand: you click, drag and type each step. R and Python are like writing a recipe card. Once the recipe exists, the computer follows it perfectly every time, on any amount of data, and anyone can repeat it next month with new figures.</div>
+  <div class="tbl-wrap"><table>
+    <tr><th></th><th>R</th><th>Python</th></tr>
+    <tr><td><b>Born for</b></td><td>Statistics and research</td><td>General-purpose work, including data</td></tr>
+    <tr><td><b>Best at</b></td><td>Statistical tests, survey analysis, publication-quality charts</td><td>Cleaning messy files, automating routine tasks, text analysis</td></tr>
+    <tr><td><b>Who uses it</b></td><td>Statistical offices, health agencies, universities</td><td>Digital teams, data engineers, analysts</td></tr>
+    <tr><td><b>Cost</b></td><td>Free</td><td>Free</td></tr>
+    <tr><td><b>Pick it if</b></td><td>Your colleagues already use R</td><td>You're starting fresh with no preference</td></tr>
+  </table></div>
+  <p>Both are excellent. <mark>For the tasks in this handbook, either one works.</mark> Use whichever your team already has, or whichever your IT department approves.</p>
+  <h3>Why you don't need to memorise code any more</h3>
+  <p>Your role shifts from <b>writer</b> to <b>editor</b>. The AI drafts the code; you:</p>
+  <ul class="plain">
+    <li>describe clearly what you need,</li>
+    <li>run the code and look at the result,</li>
+    <li>ask the AI to explain anything unclear,</li>
+    <li>check the answer makes sense against what you know.</li>
+  </ul>
+  <p>It's like using a calculator. You don't need to know how it does long division, but you do need to notice if it says 2 + 2 = 22.</p>
+  <div class="quiz" data-quiz="q2"></div>
+</section>
+
+<!-- CH3 (added) -->
+<section class="chapter" id="setup">
+  <span class="eyebrow">Chapter 03</span>
+  <h2>Your first workspace, with nothing to install</h2>
+  <p>Many government computers block software installation. The good news: you can run R and Python inside a web browser. Ask your IT team which option is approved before using real work data.</p>
+  <div class="tbl-wrap"><table>
+    <tr><th>Option</th><th>Language</th><th>What it is</th></tr>
+    <tr><td><b>Google Colab</b></td><td>Python</td><td>A free online notebook. Paste code into a box, press play.</td></tr>
+    <tr><td><b>Posit Cloud</b></td><td>R</td><td>RStudio in the browser. Free tier for learning.</td></tr>
+    <tr><td><b>RStudio / Positron (desktop)</b></td><td>R and Python</td><td>Installed by IT. Data stays on your machine, the safest choice for internal files.</td></tr>
+    <tr><td><b>Jupyter / VS Code (desktop)</b></td><td>Python</td><td>Installed by IT. Common in digital and data teams.</td></tr>
+  </table></div>
+  <ol class="steps">
+    <li><div><b>Open your workspace</b>Start a new notebook (Colab) or project (Posit Cloud).</div></li>
+    <li><div><b>Upload a practice file</b>Use public, non-sensitive data first, such as an open budget dataset from your government's open-data portal.</div></li>
+    <li><div><b>Paste the AI's code and run it</b>In a notebook, click the play button beside the code box. In RStudio, select the code and press Ctrl + Enter.</div></li>
+    <li><div><b>Read the result, not the code</b>Look at the table or chart that appears. Does it look plausible?</div></li>
+  </ol>
+  <h3>Where to find safe practice data in India</h3>
+  <div class="tbl-wrap"><table>
+    <tr><th>Portal</th><th>Run by</th><th>Good for</th></tr>
+    <tr><td><b>data.gov.in</b></td><td>Open Government Data Platform (NIC, MeitY)</td><td>Thousands of datasets from ministries, states and districts</td></tr>
+    <tr><td><b>esankhyiki.mospi.gov.in</b></td><td>MoSPI</td><td>Official statistics: prices, national accounts, labour, industry</td></tr>
+    <tr><td><b>microdata.gov.in</b></td><td>MoSPI</td><td>Unit-level survey data (NSS, PLFS) with survey weights; free registration</td></tr>
+    <tr><td><b>ndap.niti.gov.in</b></td><td>NITI Aayog</td><td>Cleaned, district-level datasets designed to be combined</td></tr>
+    <tr><td><b>State portals</b></td><td>State governments</td><td>State statistics departments and open-data sites</td></tr>
+  </table></div>
+  <div class="note warn"><span class="label">Rule of thumb</span>Online workspaces are for learning and public data. Internal or personal data belongs only in tools your department has approved.</div>
+</section>
+
+<!-- CH4 -->
+<section class="chapter" id="prompts">
+  <span class="eyebrow">Chapter 04</span>
+  <h2>How AI writes the code for you</h2>
+  <p>The instruction you type into an AI assistant is called a <b>prompt</b>. A good prompt is like a good work request to a colleague: it says what you have, what you want, and who it's for.</p>
+  <h3>The five-step loop</h3>
+  <ol class="steps">
+    <li><div><b>Describe your data</b>File name, what each column means, roughly how many rows. Never paste real personal records.</div></li>
+    <li><div><b>State your goal</b>"I want to know which district has the longest waiting times." One clear question works best.</div></li>
+    <li><div><b>Ask for code and an explanation</b>Name the language (R or Python) and ask for plain-English comments on every step.</div></li>
+    <li><div><b>Run it</b>Paste the code into your workspace and run it.</div></li>
+    <li><div><b>Fix or refine</b>If you get an error, paste the exact error message back to the AI. If the result looks odd, say so and describe why.</div></li>
+  </ol>
+  <h3>The anatomy of a good prompt</h3>
+  <div class="tbl-wrap"><table>
+    <tr><th>Part</th><th>What to include</th><th>Example</th></tr>
+    <tr><td><b>Role</b></td><td>Who the AI should act as</td><td>"Act as a patient data analyst."</td></tr>
+    <tr><td><b>Context</b></td><td>Who you are, who it's for</td><td>"I work in a city transport department."</td></tr>
+    <tr><td><b>Data</b></td><td>Columns and their meaning</td><td>"Columns: route, date, passengers."</td></tr>
+    <tr><td><b>Task</b></td><td>The one thing you want</td><td>"Find the 5 busiest routes."</td></tr>
+    <tr><td><b>Format</b></td><td>How you want the answer</td><td>"Python code with comments, then a summary table."</td></tr>
+  </table></div>
+
+  <h3>Three copy-paste templates</h3>
+  <p>Replace the <mark>highlighted</mark> parts with your own details.</p>
+
+  <div class="prompt" id="t1">
+    <div class="prompt-head"><b>Template 1 · Clean a messy spreadsheet</b><button class="btn copy" data-target="t1pre" type="button">Copy</button></div>
+<pre id="t1pre">Act as a patient data analyst helping a government employee with no programming experience.
+
+I have a file called <span class="fill">service_requests.csv</span> with about <span class="fill">20,000</span> rows.
+The columns are:
+<span class="fill">- request_id: unique number
+- district: name of the district (spelling is inconsistent, e.g. "north", "North ", "NORTH")
+- date_received: date the request came in
+- days_to_close: number of days until resolved (some blanks)</span>
+
+Please write <span class="fill">Python</span> code that:
+1. Removes exact duplicate rows
+2. Tidies text columns (trim spaces, consistent capitals)
+3. Converts dates to a proper date format
+4. Reports how many blank values each column has, without deleting them yet
+5. Saves a cleaned copy as a new file, leaving the original untouched
+
+Add a plain-English comment above every line. After the code, list any assumptions you made.</pre>
+    <div class="why">Why it works: the AI knows the exact column names, the specific mess to fix, and that it must not overwrite your original file.</div>
+  </div>
+
+  <div class="prompt" id="t2">
+    <div class="prompt-head"><b>Template 2 · Summarise and compare groups</b><button class="btn copy" data-target="t2pre" type="button">Copy</button></div>
+<pre id="t2pre">Act as a data analyst writing for a non-technical manager.
+
+Using the cleaned file <span class="fill">service_requests_clean.csv</span>, write <span class="fill">R</span> code that:
+1. Groups the data by <span class="fill">district</span>
+2. For each group, shows: number of requests, average and median <span class="fill">days_to_close</span>, and the slowest 10% threshold
+3. Sorts districts from slowest to fastest
+4. Tells me whether the difference between districts is likely to be real or could be chance, using an appropriate test
+
+Explain each step in plain English. After the code, explain which test you chose and why, in two or three sentences a manager would understand.</pre>
+    <div class="why">Why it works: it asks for the median as well as the average (see Chapter 06 for why) and makes the AI justify its choice of statistical test.</div>
+  </div>
+
+  <div class="prompt" id="t3">
+    <div class="prompt-head"><b>Template 3 · Make a clear chart</b><button class="btn copy" data-target="t3pre" type="button">Copy</button></div>
+<pre id="t3pre">Act as a data visualisation specialist for public-sector reports.
+
+Write <span class="fill">Python</span> code that creates a chart from <span class="fill">budget_2026.csv</span>, which has the columns <span class="fill">department, allocated_amount, spent_amount</span>.
+
+The chart should:
+- Compare allocated vs spent for each department, side by side
+- Sort departments from largest to smallest allocation
+- Use a title that states the main finding, not just the topic
+- Use colours that are readable for people with colour blindness
+- Label amounts in <span class="fill">millions</span>
+- Save the chart as a PNG file suitable for a slide
+
+Explain in plain English what each part of the code does, and suggest one sentence of alt text describing the chart.</pre>
+    <div class="why">Why it works: it sets standards for accessibility and clarity that a public report needs, and asks for alt text for screen-reader users.</div>
+  </div>
+
+  <div class="prompt" id="t4">
+    <div class="prompt-head"><b>Bonus · When something goes wrong</b><button class="btn copy" data-target="t4pre" type="button">Copy</button></div>
+<pre id="t4pre">I ran the code you gave me and got this error:
+
+<span class="fill">[paste the full error message here]</span>
+
+I am not a programmer. Please:
+1. Explain in one or two plain sentences what the error means
+2. Give me the corrected code
+3. Tell me what to check in my file if it happens again</pre>
+  </div>
+
+  <h3 id="builder">Build your own prompt</h3>
+  <p>Fill in the boxes. The prompt updates as you type, ready to copy into your AI tool.</p>
+  <div class="builder">
+    <div class="fields">
+      <div class="field"><label for="b-lang">Language</label><select id="b-lang"><option>Python</option><option>R</option></select></div>
+      <div class="field"><label for="b-goal">What do you want to do?</label>
+        <select id="b-goal">
+          <option value="clean">Clean and tidy the data</option>
+          <option value="summary">Summarise key numbers</option>
+          <option value="compare">Compare groups</option>
+          <option value="trend">Show a trend over time</option>
+          <option value="text">Find themes in written comments</option>
+        </select></div>
+      <div class="field"><label for="b-file">File name</label><input id="b-file" value="citizen_survey_2026.csv"></div>
+      <div class="field"><label for="b-aud">Who is the result for?</label><input id="b-aud" value="my director"></div>
+    </div>
+    <div class="field"><label for="b-cols">Columns and what they mean (one per line)</label>
+      <textarea id="b-cols" rows="4">district: area of the city
+satisfaction: score from 1 (poor) to 5 (excellent)
+comment: free-text feedback
+month: month of response</textarea></div>
+    <div class="field"><label for="builtPrompt">Your prompt</label><textarea id="builtPrompt" readonly></textarea></div>
+    <div><button class="btn solid copy" data-target="builtPrompt" type="button">Copy prompt</button></div>
+  </div>
+
+  <h3>What you'll get back, line by line</h3>
+  <p>Here's typical code an AI returns for Template 1, with each line translated. Switch between languages to see they do the same job.</p>
+  <div class="tabs" role="tablist">
+    <button class="tab" role="tab" aria-selected="true" data-lang="py" type="button">Python</button>
+    <button class="tab" role="tab" aria-selected="false" data-lang="r" type="button">R</button>
+  </div>
+  <div class="explainer" id="explainer"></div>
+  <p class="note">You don't need to understand the left column. Read the right column, then check the output matches what it promised.</p>
+  <div class="quiz" data-quiz="q3"></div>
+</section>
+
+<!-- CHOOSE -->
+<section class="chapter" id="choose" data-short="Choosing the right analysis">
+  <span class="eyebrow">Chapter 05</span>
+  <h2>Choosing the right analysis</h2>
+  <p>The AI can run almost any statistical method. Its weak point is knowing <b>which</b> one fits your question, because it only knows what you tell it. If you name the type of question, you'll get a better answer.</p>
+  <div class="analogy"><b>A toolbox, not a magic wand.</b> You wouldn't use a hammer on a screw. Each analysis is a tool built for one kind of question. Start by naming the question, and the right tool usually picks itself.</div>
+  <h3>What kind of question are you asking?</h3>
+  <p>Pick the one closest to yours.</p>
+  <div class="qgrid" id="qgrid"></div>
+  <div class="result" id="qresult" aria-live="polite"></div>
+  <h3>All question types at a glance</h3>
+  <div class="tbl-wrap"><table>
+    <tr><th>Question</th><th>Chart</th><th>Usual method</th></tr>
+    <tr><td>What's typical?</td><td>Histogram or box plot</td><td>Median, percentiles</td></tr>
+    <tr><td>Do two groups differ?</td><td>Side-by-side box plots</td><td>t-test or Mann–Whitney</td></tr>
+    <tr><td>Do three or more groups differ?</td><td>Sorted dot plot</td><td>ANOVA or Kruskal–Wallis</td></tr>
+    <tr><td>Do rates or percentages differ?</td><td>Sorted bar of %</td><td>Chi-square test</td></tr>
+    <tr><td>Do two measures move together?</td><td>Scatter plot</td><td>Correlation</td></tr>
+    <tr><td>Is it going up or down?</td><td>Line chart</td><td>Year-on-year change, moving average</td></tr>
+    <tr><td>Which factors matter most?</td><td>Coefficient plot</td><td>Regression</td></tr>
+    <tr><td>What are people saying?</td><td>Bar chart of themes</td><td>Theme coding, word counts</td></tr>
+  </table></div>
+  <p class="note">You don't need to remember the method names. Put the plain-English question in your prompt and add: "Suggest the most suitable method and explain why in two sentences."</p>
+  <div class="quiz" data-quiz="q9"></div>
+</section>
+
+<!-- CH5 -->
+<section class="chapter" id="numbers">
+  <span class="eyebrow">Chapter 06</span>
+  <h2>Making sense of the numbers</h2>
+  <p>Getting a result is half the job. The other half is knowing what it means, and what it doesn't. AI is very good at translating statistical output into plain language, if you ask well.</p>
+
+  <h3>Why the average can mislead</h3>
+  <p>Below are seven community grants. Drag the slider to make one grant much larger and watch what happens.</p>
+  <div class="demo">
+    <label for="outlier"><b>Size of Grant G:</b> <span id="outVal">₹ 60 k</span></label>
+    <input type="range" id="outlier" min="60" max="1500" step="10" value="60">
+    <svg id="bars" viewBox="0 0 640 220" role="img" aria-label="Bar chart of seven grant amounts"></svg>
+    <div class="stats">
+      <div class="stat mean"><span class="label">Average (mean)</span><b id="meanV">—</b></div>
+      <div class="stat median"><span class="label">Middle value (median)</span><b id="medV">—</b></div>
+    </div>
+    <p id="demoSay" style="margin:0"></p>
+  </div>
+  <div class="analogy"><b>The bus-stop test.</b> If a billionaire joins ten people at a bus stop, the <i>average</i> wealth at the stop becomes enormous, yet nobody else got richer. The <i>median</i>, the person in the middle, barely moves. For incomes, grants, waiting times and costs, always ask for both.</div>
+
+  <h3>Statistics in plain English</h3>
+  <div class="concepts">
+    <div class="concept"><h4>Average (mean)</h4><p>Add everything up, divide by how many.</p><p class="ex">Easily pulled up or down by a few extreme values.</p></div>
+    <div class="concept"><h4>Median</h4><p>The middle value when everything is lined up in order.</p><p class="ex">Half are above, half below. Robust to extremes.</p></div>
+    <div class="concept"><h4>Percentage change</h4><p>How much something grew or shrank compared with where it started.</p><p class="ex">From 200 to 250 complaints is +25%, not +50.</p></div>
+    <div class="concept"><h4>Correlation</h4><p>Two things tend to move together.</p><p class="ex">Ice-cream sales and drownings rise together. Summer causes both. Correlation is not cause.</p></div>
+    <div class="concept"><h4>Statistically significant</h4><p>The difference is unlikely to be pure luck.</p><p class="ex">It does not mean "large" or "important". A tiny difference can be significant in big data.</p></div>
+    <div class="concept"><h4>p-value</h4><p>Roughly: if there were really no difference, how surprising would this result be?</p><p class="ex">Below 0.05 is the usual "probably not chance" line. It's a convention, not a law.</p></div>
+    <div class="concept"><h4>Confidence interval</h4><p>A range where the true value probably sits.</p><p class="ex">"Satisfaction 72% (68% to 76%)": the real figure is likely within that band.</p></div>
+    <div class="concept"><h4>Sample size</h4><p>How many people or records the result is based on.</p><p class="ex">A district with 12 survey replies tells you far less than one with 1,200.</p></div>
+  </div>
+
+  <h3>Asking AI to interpret results</h3>
+  <p>Paste the output (a summary table, test result or description of a chart) and use this prompt. Output tables are usually fine to share, because they contain summaries, not people.</p>
+  <div class="prompt" id="t5">
+    <div class="prompt-head"><b>Template · "What does this mean for my department?"</b><button class="btn copy" data-target="t5pre" type="button">Copy</button></div>
+<pre id="t5pre">I work in <span class="fill">the housing department</span>. Below is the output from my analysis of <span class="fill">repair request waiting times by district</span>.
+
+<span class="fill">[paste the output table or test result]</span>
+
+Please explain, for someone with no statistics background:
+1. What are the 3 most important things this result shows?
+2. What does it NOT show? What should I avoid claiming?
+3. How confident can I be? Is the sample big enough?
+4. What might this mean for my department's decisions?
+5. What follow-up questions should I investigate before acting?
+
+Use short sentences. Avoid jargon, or explain any technical term you must use.</pre>
+  </div>
+
+  <h3>Five questions for any chart</h3>
+  <ol class="steps">
+    <li><div><b>Where does the vertical axis start?</b>A bar chart that doesn't start at zero can make a 2% difference look huge.</div></li>
+    <li><div><b>How many records are behind each bar?</b>Ask the AI to add counts to the labels.</div></li>
+    <li><div><b>Is it a total or a rate?</b>Bigger districts will have more complaints. Per 1,000 residents is often fairer.</div></li>
+    <li><div><b>What time period?</b>A single unusual month (a flood, a strike) can distort a trend.</div></li>
+    <li><div><b>What's missing?</b>Who didn't respond to the survey? Which offices didn't report?</div></li>
+  </ol>
+  <div class="quiz" data-quiz="q4"></div>
+</section>
+
+<!-- MISTAKES -->
+<section class="chapter" id="mistakes" data-short="Common AI mistakes">
+  <span class="eyebrow">Chapter 07</span>
+  <h2>Common AI mistakes in statistics, and how to catch them</h2>
+  <p>AI-written code usually runs. That's the trap. Code can run perfectly and still give the wrong answer. These are the mistakes that come up most often in practice, with a quick way to spot each one.</p>
+  <div class="concepts">
+    <div class="concept"><span class="sev high">High risk</span><h4>Rows silently dropped</h4><p>Many functions quietly skip rows with blanks. Your 10,000 records become 7,400 without warning.</p><p class="spot"><b>Spot it:</b> compare row counts before and after each step.</p><p class="fix"><b>Prevent:</b> "Print the row count after every step and tell me how blanks are handled."</p></div>
+    <div class="concept"><span class="sev high">High risk</span><h4>Made-up numbers in the summary</h4><p>The code output says 72%, but the AI's written summary says 75%. AI can "hallucinate" figures when it writes prose.</p><p class="spot"><b>Spot it:</b> every number in the text must appear in the actual output.</p><p class="fix"><b>Prevent:</b> "Only quote numbers that appear in the output I pasted."</p></div>
+    <div class="concept"><span class="sev high">High risk</span><h4>Dates read the wrong way</h4><p>05/07/2025 means 5 July in India and 7 May in the US. Code may guess the US format.</p><p class="spot"><b>Spot it:</b> check that months run 1–12 and no dates fall in the future.</p><p class="fix"><b>Prevent:</b> "Dates are in DD/MM/YYYY format."</p></div>
+    <div class="concept"><span class="sev high">High risk</span><h4>Rows multiplied by a merge</h4><p>Joining two files with repeated IDs can duplicate rows and inflate totals.</p><p class="spot"><b>Spot it:</b> totals suddenly larger than the published figure.</p><p class="fix"><b>Prevent:</b> "Check the join key is unique in both files before merging."</p></div>
+    <div class="concept"><span class="sev med">Medium risk</span><h4>Wrong test for the data</h4><p>Using a t-test on very skewed data, like waiting times, or on 1–5 ratings.</p><p class="spot"><b>Spot it:</b> ask "what does this test assume, and does my data meet that?"</p><p class="fix"><b>Prevent:</b> "Check the assumptions and use a non-parametric test if needed."</p></div>
+    <div class="concept"><span class="sev med">Medium risk</span><h4>Misreading the p-value</h4><p>"p = 0.03 means a 97% chance we're right" is wrong. So is "significant means big".</p><p class="spot"><b>Spot it:</b> the summary should report the size of the difference as well as the p-value.</p><p class="fix"><b>Prevent:</b> "Report the size of the difference with a confidence interval."</p></div>
+    <div class="concept"><span class="sev med">Medium risk</span><h4>Totals instead of rates</h4><p>The biggest district looks worst simply because it's biggest.</p><p class="spot"><b>Spot it:</b> ask "per what?" for every comparison.</p><p class="fix"><b>Prevent:</b> "Compare per lakh population (or per application)."</p></div>
+    <div class="concept"><span class="sev med">Medium risk</span><h4>Cause claimed from correlation</h4><p>"More staff training led to faster processing" when the data only shows they occur together.</p><p class="spot"><b>Spot it:</b> words like "caused", "led to", "because of" in the summary.</p><p class="fix"><b>Prevent:</b> "Describe associations only. Don't claim causes."</p></div>
+    <div class="concept"><span class="sev med">Medium risk</span><h4>Averaging rating scales</h4><p>"Average satisfaction 3.4" hides that 40% were very unhappy.</p><p class="spot"><b>Spot it:</b> a single average reported for a 1–5 scale.</p><p class="fix"><b>Prevent:</b> "Show the % for each answer and the % who agree."</p></div>
+    <div class="concept"><span class="sev med">Medium risk</span><h4>Unclear percentages</h4><p>"40% were rejected." 40% of all applications, or of those reviewed so far?</p><p class="spot"><b>Spot it:</b> a percentage with no stated base.</p><p class="fix"><b>Prevent:</b> "State the denominator for every percentage."</p></div>
+  </div>
+  <h3>The self-check prompt</h3>
+  <p>After any analysis, paste your code back with this prompt. AI is often good at reviewing its own work when asked directly.</p>
+  <div class="prompt" id="t7">
+    <div class="prompt-head"><b>Template · Review the analysis</b><button class="btn copy" data-target="t7pre" type="button">Copy</button></div>
+<pre id="t7pre">Act as a careful senior statistician reviewing a junior colleague's work.
+
+Here is my code and its output:
+<span class="fill">[paste code and output]</span>
+
+Check for these specific problems and report each as OK / Problem / Can't tell:
+1. Rows lost or duplicated at any step
+2. How missing values were handled
+3. Date format (my dates are <span class="fill">DD/MM/YYYY</span>)
+4. Whether the statistical test suits this data
+5. Totals used where rates would be fairer
+6. Any claim of cause that the data can't support
+7. Percentages without a clear denominator
+
+For every problem, show the corrected code.</pre>
+  </div>
+  <div class="quiz" data-quiz="q10"></div>
+</section>
+
+<!-- SURVEY -->
+<section class="chapter" id="survey" data-short="Working with survey data">
+  <span class="eyebrow">Chapter 08</span>
+  <h2>Working with survey data</h2>
+  <p>Much government analysis starts with a survey: citizen satisfaction, household conditions, staff feedback. Surveys follow a few special rules. If nobody tells the AI about them, it will treat the survey like an ordinary spreadsheet and get the answer subtly wrong.</p>
+  <div class="analogy"><b>Tasting the soup.</b> You don't drink the whole pot to check the salt. One spoonful is enough, as long as you stir first. A survey is the spoonful; the population is the pot. Random sampling is the stirring. Everything in this chapter is about making sure the spoonful tastes like the pot.</div>
+
+  <h3>1. Survey weights</h3>
+  <p>Sometimes some groups end up over-represented in a survey. Weights correct for this. Each respondent counts for more or less than one person, depending on how many people like them were missed.</p>
+  <div class="tbl-wrap"><table>
+    <tr><th>Group</th><th class="num">Respondents</th><th class="num">% satisfied</th><th class="num">Share of real population</th></tr>
+    <tr><td>Urban</td><td class="num">600</td><td class="num">70%</td><td class="num">40%</td></tr>
+    <tr><td>Rural</td><td class="num">400</td><td class="num">50%</td><td class="num">60%</td></tr>
+    <tr><td><b>Unweighted result</b></td><td class="num" colspan="2"><b>62%</b></td><td>Too many urban replies pull it up</td></tr>
+    <tr><td><b>Weighted result</b></td><td class="num" colspan="2"><b>58%</b></td><td>0.4 × 70% + 0.6 × 50%</td></tr>
+  </table></div>
+  <p>If your file has a weight column (in NSS and PLFS data it's often called a <i>multiplier</i>), <mark>always tell the AI its name and ask it to use survey-aware methods.</mark> In R these are the <span class="inline-code">survey</span> and <span class="inline-code">srvyr</span> packages; in Python, <span class="inline-code">samplics</span>.</p>
+
+  <h3>2. Rating scales (Likert questions)</h3>
+  <p>"Strongly disagree" to "strongly agree" answers are categories, not measurements. The gap between "agree" and "strongly agree" isn't necessarily the same as between "neutral" and "agree".</p>
+  <ul class="plain">
+    <li>Report the <b>percentage for each answer</b>, and the share who agree (agree + strongly agree).</li>
+    <li>Use a diverging stacked bar chart, with negative answers on the left and positive on the right.</li>
+    <li>An average score is fine as an extra, never on its own.</li>
+  </ul>
+
+  <h3>3. Margin of error</h3>
+  <p>A survey result is an estimate. The margin of error tells you how far off it might be. Roughly, at 95% confidence for a simple random sample:</p>
+  <div class="tbl-wrap"><table>
+    <tr><th class="num">Respondents</th><th class="num">Margin of error</th><th>Plain English</th></tr>
+    <tr><td class="num">100</td><td class="num">± 9.8 points</td><td>"60%" could really be 50% to 70%</td></tr>
+    <tr><td class="num">400</td><td class="num">± 4.9 points</td><td>Fine for a broad picture</td></tr>
+    <tr><td class="num">1,000</td><td class="num">± 3.1 points</td><td>Typical for a state-level survey</td></tr>
+    <tr><td class="num">2,500</td><td class="num">± 2.0 points</td><td>Good enough to track small changes</td></tr>
+  </table></div>
+  <p class="note">Surveys that sample villages or blocks first (cluster sampling) have <b>larger</b> margins than this table shows. Ask the AI to calculate them using the survey design.</p>
+
+  <h3>4. Small groups and privacy</h3>
+  <ul class="plain">
+    <li>Don't report results for very small groups. A common rule is to suppress any cell with fewer than 10 respondents; follow your organisation's own threshold.</li>
+    <li>Small groups are unreliable, and they can identify people. "The one female engineer in Block 4 was dissatisfied" is a privacy breach.</li>
+    <li>Combine small categories (e.g. age bands) or report "fewer than 10".</li>
+  </ul>
+
+  <h3>5. Who didn't answer?</h3>
+  <p>If only satisfied (or only angry) citizens reply, the result is biased however large the sample. Always report the response rate and ask whether non-responders might differ.</p>
+
+  <div class="prompt" id="t8">
+    <div class="prompt-head"><b>Template · Analyse a survey properly</b><button class="btn copy" data-target="t8pre" type="button">Copy</button></div>
+<pre id="t8pre">Act as a survey statistician helping a government analyst.
+
+My survey file <span class="fill">citizen_survey.csv</span> has:
+<span class="fill">- weight: survey weight for each respondent
+- district: 12 districts
+- q5_satisfaction: 1 = very dissatisfied ... 5 = very satisfied
+- age_group, gender</span>
+
+Write <span class="fill">R</span> code using survey-aware methods that:
+1. Uses the weight column for all estimates
+2. Shows the weighted % for each answer to q5, overall and by district
+3. Reports the % satisfied (4 or 5) with a 95% confidence interval
+4. Hides any district/group cell with fewer than <span class="fill">10</span> respondents
+5. Draws a diverging stacked bar chart
+
+Explain each step in plain English and say what the confidence intervals mean.</pre>
+  </div>
+  <div class="quiz" data-quiz="q11"></div>
+</section>
+
+<!-- CH6 -->
+<section class="chapter" id="examples">
+  <span class="eyebrow">Chapter 09</span>
+  <h2>Real-world government examples</h2>
+  <p>Three realistic cases. In each one, the staff member never writes code. They describe, run, check and interpret. Open each scenario to follow along.</p>
+
+  <details class="scenario" open>
+    <summary><span class="tag">Case A</span><b>Understanding 4,800 citizen feedback comments</b></summary>
+    <div class="sc-body">
+      <p><b>Situation.</b> Priya in a municipal services office has a year of online feedback: a satisfaction score from 1 to 5 and a free-text comment. Her director wants to know "what people are unhappy about".</p>
+      <p><b>Safety first.</b> She removes names, phone numbers and email addresses before analysis, and runs the code in her department's approved desktop tool, not an online chatbot.</p>
+      <p><b>What she asked the AI.</b> She described the columns (no real comments) and asked for Python code to: count responses by month, find the most common words and phrases in low-score comments, and group comments into themes.</p>
+      <div class="finding">
+        <div><span class="label">Finding</span>38% of low scores mention waiting or "no reply"</div>
+        <div><span class="label">Finding</span>Complaints doubled after the phone line changed in March</div>
+        <div><span class="label">Check</span>She read 30 random comments to confirm the themes were real</div>
+      </div>
+      <p><b>Lesson.</b> AI found the patterns fast; Priya's reading of real comments confirmed they meant what the AI thought.</p>
+    </div>
+  </details>
+
+  <details class="scenario">
+    <summary><span class="tag">Case B</span><b>Is the infrastructure budget fairly distributed?</b></summary>
+    <div class="sc-body">
+      <p><b>Situation.</b> Arun in a state finance office is asked whether road maintenance money reaches rural districts fairly. The budget file is already published on the open-data portal, so it is safe to use.</p>
+      <p><b>What he asked the AI.</b> R code to calculate spending per kilometre of road and per resident for each district, rank them, and draw a sorted bar chart.</p>
+      <div class="finding">
+        <div><span class="label">First result</span>Urban districts get 3× the total money</div>
+        <div><span class="label">Better result</span>Per kilometre of road, rural districts get 40% less</div>
+        <div><span class="label">AI caution</span>Road condition data is missing, so "need" isn't measured</div>
+      </div>
+      <p><b>Lesson.</b> Totals and rates told different stories. Asking "per what?" changed the conclusion. Arun's briefing note says what the data can and cannot show.</p>
+    </div>
+  </details>
+
+  <details class="scenario">
+    <summary><span class="tag">Case C</span><b>Why are building permits taking longer?</b></summary>
+    <div class="sc-body">
+      <p><b>Situation.</b> Meera, a planning officer, hears that permits are slower this year. She has 3 years of permit records with the application date, decision date and permit type.</p>
+      <p><b>What she asked the AI.</b> Python code to calculate processing days, show the monthly median as a line chart, and compare permit types. Then she pasted the results and used the "What does this mean for my department?" template.</p>
+      <div class="finding">
+        <div><span class="label">Finding</span>Median time rose from 34 to 51 days</div>
+        <div><span class="label">Finding</span>Almost all the rise came from commercial permits</div>
+        <div><span class="label">Follow-up</span>AI suggested checking whether a new rule began that month. It had.</div>
+      </div>
+      <p><b>Lesson.</b> The AI couldn't know about the new regulation, but it prompted the right question. Meera supplied the context.</p>
+    </div>
+  </details>
+  <div class="quiz" data-quiz="q5"></div>
+</section>
+
+<!-- WORKED -->
+<section class="chapter" id="worked" data-short="Worked example, start to finish">
+  <span class="eyebrow">Chapter 10</span>
+  <h2>Worked example: grievance redressal in six districts</h2>
+  <p>This chapter follows one analysis all the way through, from raw file to finding. Every number and chart on this page is calculated live from the sample data below, so you can check them yourself.</p>
+  <div class="note warn"><span class="label">About the data</span>The six districts and all figures are <b>invented for training</b>. The file is modelled on the shape of a monthly public-grievance report: April 2025 to March 2026, 72 rows. For real practice data, see the portals in Chapter 03.</div>
+
+  <h3>The question</h3>
+  <p>A Collector's office asks: <i>"Which districts are struggling most with citizen grievances, and is it getting worse?"</i></p>
+
+  <h3>Step 1 · Look at the data</h3>
+  <div class="tbl-wrap"><table>
+    <tr><th>Column</th><th>Meaning</th></tr>
+    <tr><td><span class="inline-code">district</span></td><td>District name</td></tr>
+    <tr><td><span class="inline-code">month</span></td><td>Year and month (YYYY-MM)</td></tr>
+    <tr><td><span class="inline-code">population_lakh</span></td><td>District population in lakh</td></tr>
+    <tr><td><span class="inline-code">received</span></td><td>Grievances received that month</td></tr>
+    <tr><td><span class="inline-code">resolved_30d</span></td><td>Of those, resolved within 30 days</td></tr>
+    <tr><td><span class="inline-code">median_days</span></td><td>Median days to resolve that month</td></tr>
+  </table></div>
+  <div class="tbl-wrap"><table id="wePreview"></table></div>
+  <div><button class="btn copy" data-target="weData" type="button">Copy all 72 rows (CSV)</button> <span style="font-size:.88rem;color:var(--muted)">Paste into a text file, save as <span class="inline-code">grievances.csv</span>, and follow along.</span></div>
+
+  <h3>Step 2 · The prompt</h3>
+  <div class="prompt" id="t9">
+    <div class="prompt-head"><b>Prompt used</b><button class="btn copy" data-target="t9pre" type="button">Copy</button></div>
+<pre id="t9pre">Act as a patient data analyst. I have grievances.csv with 72 rows: one row per district per month (Apr 2025 – Mar 2026).
+Columns: district, month (YYYY-MM), population_lakh, received, resolved_30d (resolved within 30 days), median_days.
+
+Write Python code that, for each district:
+1. Totals grievances received and resolved within 30 days
+2. Calculates grievances per lakh population
+3. Calculates the % resolved within 30 days
+4. Gives the median of the monthly median_days
+Sort by % resolved, lowest first. Then test whether resolution rates genuinely differ between districts.
+Comment every line in plain English. Print the row count after loading.</pre>
+  </div>
+
+  <h3>Step 3 · The code the AI returned</h3>
+  <div class="tabs" role="tablist">
+    <button class="tab" role="tab" aria-selected="true" data-we="py" type="button">Python</button>
+    <button class="tab" role="tab" aria-selected="false" data-we="r" type="button">R</button>
+  </div>
+  <div class="explainer" id="weCode"></div>
+
+  <h3>Step 4 · The results</h3>
+  <div class="tbl-wrap"><table id="weTable"></table></div>
+  <div class="chartbox">
+    <b style="font-family:var(--f-display)">Shivgarh has the most grievances per person and resolves the fewest on time</b>
+    <div class="legend"><span><i style="background:var(--accent)"></i>Grievances per lakh people</span><span><i style="background:var(--bad)"></i>% resolved within 30 days</span></div>
+    <svg id="weBars" viewBox="0 0 680 300" role="img" aria-label="Paired bar chart of grievances per lakh and percentage resolved within 30 days for six districts"></svg>
+    <p class="cap">Both measures share one scale from 0 to 100. Sample data, Apr 2025 – Mar 2026.</p>
+  </div>
+  <p><b>Statistical test.</b> A chi-square test compares the share resolved on time across the six districts: χ² = 189.7, 5 degrees of freedom, p &lt; 0.001. <mark>The differences are far too large to be chance.</mark> Shivgarh's 57% compares with 73–84% everywhere else.</p>
+
+  <h3>Step 5 · Is it getting worse?</h3>
+  <p>A follow-up prompt asked for monthly totals across all districts as a line chart.</p>
+  <div class="chartbox">
+    <b style="font-family:var(--f-display)">Grievances jump in July–August, and on-time resolution dips</b>
+    <div class="legend"><span><i style="background:var(--accent)"></i>Grievances received (left scale)</span><span><i style="background:var(--warn)"></i>% resolved in 30 days (right scale)</span></div>
+    <svg id="weLine" viewBox="0 0 680 300" role="img" aria-label="Line chart of monthly grievances received and percentage resolved, April 2025 to March 2026"></svg>
+    <p class="cap">All six districts combined. Sample data.</p>
+  </div>
+
+  <h3>Step 6 · Interpretation</h3>
+  <ul class="plain">
+    <li><b>Totals mislead here.</b> Nandpur received the most grievances (1,590) but has the <i>lowest</i> rate per lakh people (41.4) and resolves 83% on time.</li>
+    <li><b>Shivgarh needs attention.</b> It has the highest rate per lakh (60.1), the lowest on-time resolution (57.2%), and a typical wait of about 33 days.</li>
+    <li><b>Monsoon pressure.</b> Grievances rise by about 40% in July–August (598 and 604 against roughly 420 a month), and on-time resolution falls to about 71%.</li>
+    <li><b>No year-long decline.</b> Outside the monsoon months, resolution stays in the 74–83% range.</li>
+    <li><b>What the data can't say.</b> It doesn't explain <i>why</i> Shivgarh is slower. Staffing, the type of grievances or geography would need checking.</li>
+  </ul>
+  <p>Chapter 11 turns these findings into a briefing note.</p>
+</section>
+
+<!-- WRITEUP -->
+<section class="chapter" id="writeup" data-short="Writing it up">
+  <span class="eyebrow">Chapter 11</span>
+  <h2>Writing it up: briefing notes and AI disclosure</h2>
+  <p>Analysis only matters once someone reads it and acts. Senior officers have little time, so the finding goes first, the method last, and every number must be checkable.</p>
+  <h3>The shape of a good briefing note</h3>
+  <div class="tbl-wrap"><table>
+    <tr><th>Section</th><th>What goes in it</th><th>Length</th></tr>
+    <tr><td><b>Purpose</b></td><td>The question you were asked</td><td>1 sentence</td></tr>
+    <tr><td><b>Key findings</b></td><td>The answer, with numbers</td><td>3 bullets</td></tr>
+    <tr><td><b>What it means</b></td><td>Why it matters for the department</td><td>2–3 sentences</td></tr>
+    <tr><td><b>Limitations</b></td><td>What the data can't tell us</td><td>1–2 bullets</td></tr>
+    <tr><td><b>Recommendation</b></td><td>The decision or next step</td><td>1–2 sentences</td></tr>
+    <tr><td><b>Method note</b></td><td>Data source, period, tools, AI use</td><td>Small print</td></tr>
+  </table></div>
+
+  <h3>Example, built from Chapter 10</h3>
+  <div class="brief">
+    <h4>Briefing note: Grievance redressal performance, FY 2025–26</h4>
+    <span class="bh">Purpose</span>
+    <p>To identify districts struggling with grievance redressal and check whether performance is worsening.</p>
+    <span class="bh">Key findings</span>
+    <ul>
+      <li>Shivgarh resolves 57% of grievances within 30 days, against 73–84% in the other five districts.</li>
+      <li>Shivgarh also receives the most grievances per person: 60 per lakh people, against 41–56 elsewhere.</li>
+      <li>Grievances rise by about 40% in July–August each year, and on-time resolution falls to about 71%.</li>
+    </ul>
+    <span class="bh">What it means</span>
+    <p>Shivgarh's problem is not volume alone; it is slower per case. The monsoon peak affects every district and is predictable.</p>
+    <span class="bh">Limitations</span>
+    <ul><li>The data does not record grievance type or staffing, so the causes are not yet known.</li></ul>
+    <span class="bh">Recommendation</span>
+    <p>Review staffing and case mix in Shivgarh, and plan temporary capacity for July–August from next year.</p>
+    <span class="bh">Method note</span>
+    <p style="font-size:.85rem;color:var(--muted)">Monthly grievance records, Apr 2025 – Mar 2026, 6 districts. Analysis in Python (pandas, SciPy). Code drafted with an AI assistant and checked by the analyst; figures verified against source totals.</p>
+  </div>
+
+  <div class="prompt" id="t10">
+    <div class="prompt-head"><b>Template · Draft a briefing note</b><button class="btn copy" data-target="t10pre" type="button">Copy</button></div>
+<pre id="t10pre">Act as an experienced government policy writer.
+
+Using ONLY the results below, draft a one-page briefing note for <span class="fill">the District Collector</span>.
+<span class="fill">[paste your summary table and key outputs]</span>
+
+Structure: Purpose (1 sentence), Key findings (3 bullets, each with a number), What it means (2–3 sentences), Limitations (1–2 bullets), Recommendation (1–2 sentences), Method note.
+
+Rules:
+- Use only numbers that appear in my results. Do not calculate new ones.
+- Plain English, short sentences, no jargon.
+- Round sensibly (57%, not 57.21%). Use Indian number format (lakh, crore).
+- Describe associations, not causes.</pre>
+  </div>
+
+  <h3>Plain-number rules</h3>
+  <ul class="plain">
+    <li>Round: "57%" not "57.21%"; "about ₹4.2 crore" not "₹4,21,63,880".</li>
+    <li>Use comparisons people can picture: "about 6 in 10" or "nearly twice as high".</li>
+    <li>Always give the base: "57% of the 589 grievances received".</li>
+    <li>Pick one number system and stick to it: lakh/crore for Indian audiences, million/billion for international ones.</li>
+  </ul>
+
+  <h3>Saying that AI helped</h3>
+  <p>Being open about AI use builds trust and lets reviewers check the right things. Use a short line in routine notes and a fuller statement in published reports.</p>
+  <div class="prompt" id="t11">
+    <div class="prompt-head"><b>Disclosure · Short version</b><button class="btn copy" data-target="t11pre" type="button">Copy</button></div>
+<pre id="t11pre">Analysis code was drafted with the help of an AI assistant (<span class="fill">tool name</span>) and reviewed, run and verified by <span class="fill">[name/team]</span>. No personal data was shared with the AI tool.</pre>
+  </div>
+  <div class="prompt" id="t12">
+    <div class="prompt-head"><b>Disclosure · Full version</b><button class="btn copy" data-target="t12pre" type="button">Copy</button></div>
+<pre id="t12pre">Use of AI in this report
+- Tool: <span class="fill">[AI tool and model]</span>, accessed via <span class="fill">[department-approved platform / API / local installation]</span>
+- Used for: drafting analysis code in <span class="fill">R/Python</span>; first draft of plain-language explanations
+- Not used for: final conclusions, recommendations or decisions about individuals
+- Data shared with the tool: <span class="fill">column descriptions and summary tables only; no personal or confidential records</span>
+- Verification: all figures were reproduced from source data by <span class="fill">[name]</span> and reviewed by <span class="fill">[name]</span> on <span class="fill">[date]</span>
+- Code and prompts are retained at: <span class="fill">[location]</span></pre>
+  </div>
+  <div class="quiz" data-quiz="q12"></div>
+</section>
+
+<!-- CH7 -->
+<section class="chapter" id="safety">
+  <span class="eyebrow">Chapter 12</span>
+  <h2>Safety and ethics</h2>
+  <p>Public trust depends on handling citizens' information carefully. Most public AI chat tools send what you type to external servers. Treat the chat box like an email to someone outside your organisation.</p>
+  <div class="note bad"><span class="label">Golden rule</span><b>Never paste or upload personal or confidential data into an AI tool your department hasn't approved for that data.</b> Follow your organisation's AI and data-protection policy; it overrides anything in this handbook.</div>
+
+  <h3>If you work in India</h3>
+  <div class="tbl-wrap"><table>
+    <tr><th>Law or rule</th><th>What it means for you</th></tr>
+    <tr><td><b>Digital Personal Data Protection Act, 2023</b></td><td>India's main data-protection law. It covers digital personal data, including citizen records held by government bodies.</td></tr>
+    <tr><td><b>DPDP Rules, 2025</b></td><td>Notified on 13 November 2025 and phased in. Most duties (notice, consent, security safeguards, breach reporting, retention) apply from 13 May 2027.</td></tr>
+    <tr><td><b>Penalties</b></td><td>Up to ₹250 crore for failing to take reasonable security safeguards to protect personal data.</td></tr>
+    <tr><td><b>Government exemptions</b></td><td>Some processing by the State is exempt for specific purposes. Don't assume yours is: ask your department's data protection or legal officer.</td></tr>
+    <tr><td><b>Aadhaar</b></td><td>Aadhaar numbers have their own restrictions under the Aadhaar Act. Never paste them into any AI tool.</td></tr>
+  </table></div>
+  <p>In practice: pasting citizen records into an unapproved AI tool could amount to a personal data breach. The "share the shape, not the data" method below avoids the problem entirely.</p>
+  <h3>The traffic-light test</h3>
+  <div class="lights">
+    <div class="light g"><h4>Green · fine to share</h4><ul><li>Published open data</li><li>Column names and descriptions</li><li>Made-up example rows</li><li>Summary tables with no individuals</li><li>Error messages (check they don't contain data)</li></ul></div>
+    <div class="light a"><h4>Amber · check first</h4><ul><li>Internal reports not yet published</li><li>Draft budget figures</li><li>Small-group summaries (e.g. fewer than 10 people)</li><li>Anything marked "internal"</li></ul></div>
+    <div class="light r"><h4>Red · never share</h4><ul><li>Names, addresses, phone numbers, ID numbers</li><li>Health, welfare, tax or criminal records</li><li>Children's data</li><li>Raw files of citizen records</li><li>Passwords or system access details</li></ul></div>
+  </div>
+
+  <h3>The safe method: share the shape, not the data</h3>
+  <p>You can get excellent code without the AI ever seeing a real record. Describe the columns and give 3 invented example rows. The AI writes code; you run it locally on the real file.</p>
+  <div class="prompt" id="t6">
+    <div class="prompt-head"><b>Example · describing data safely</b><button class="btn copy" data-target="t6pre" type="button">Copy</button></div>
+<pre id="t6pre">My file has these columns. The example rows below are invented, not real data.
+
+applicant_id | district | benefit_type | amount | date_applied
+A001         | North    | Housing      | 4500   | 2026-01-14
+A002         | East     | Disability   | 3200   | 2026-02-03
+A003         | North    | Housing      | 5100   | 2026-02-19
+
+Write <span class="fill">R</span> code to total the amount by district and benefit type.</pre>
+  </div>
+
+  <h3>Fact-checking AI output</h3>
+  <p>Tick these off before any AI-assisted result goes into a report. Your ticks are saved in this browser.</p>
+  <div class="checklist" id="checklist">
+    <label><input type="checkbox" id="c1"><span>The row count after cleaning makes sense (no data silently lost).</span></label>
+    <label><input type="checkbox" id="c2"><span>I checked two or three figures by hand or in Excel.</span></label>
+    <label><input type="checkbox" id="c3"><span>Totals match a known source (e.g. the published budget total).</span></label>
+    <label><input type="checkbox" id="c4"><span>I asked the AI to list its assumptions, and they're correct.</span></label>
+    <label><input type="checkbox" id="c5"><span>Small groups are not reported in a way that could identify individuals.</span></label>
+    <label><input type="checkbox" id="c6"><span>Any statistic or fact the AI stated (not calculated) has been verified at a real source.</span></label>
+    <label><input type="checkbox" id="c7"><span>A colleague reviewed the conclusion before it was shared.</span></label>
+    <label><input type="checkbox" id="c8"><span>The report notes that AI assisted with the analysis.</span></label>
+    <div class="check-score" id="checkScore">0 of 8 checked</div>
+  </div>
+
+  <h3>Fairness and bias</h3>
+  <ul class="plain">
+    <li><b>Data reflects the past.</b> If some communities report problems less often, low complaint numbers don't mean fewer problems.</li>
+    <li><b>Averages hide groups.</b> Ask the AI to break results down by area, age band or service type where relevant.</li>
+    <li><b>Decisions stay human.</b> AI analysis informs decisions about people; it should not make them.</li>
+    <li><b>Be transparent.</b> Keep your prompts and code with the report so others can repeat and check the work.</li>
+  </ul>
+  <div class="quiz" data-quiz="q6"></div>
+</section>
+
+<!-- CH8 tools -->
+<section class="chapter" id="tools">
+  <span class="eyebrow">Chapter 13 · Next level</span>
+  <h2>Using AI inside Jupyter, RStudio and VS Code</h2>
+  <p>So far you've copied prompts into a chat window and pasted code back. That works, but it gets tiring. The next step is to bring the AI <b>into the place where your code runs</b>, so it can see your work and answer without the copy-paste shuffle.</p>
+  <div class="analogy"><b>From phoning a colleague to having them sit beside you.</b> A chat window is a phone call: you describe your screen and hope they understand. An in-editor assistant is the same colleague pulling up a chair. They see your code, your error, and (in some tools) your data columns.</div>
+
+  <h3>Three ways to connect</h3>
+  <div class="tbl-wrap"><table>
+    <tr><th>Route</th><th>What it feels like</th><th>Setup</th><th>Data leaves your computer?</th></tr>
+    <tr><td><b>1. Built-in assistant</b></td><td>A chat panel and auto-complete inside the editor</td><td>Install an extension, sign in</td><td>Yes, to the provider</td></tr>
+    <tr><td><b>2. API from your code</b></td><td>Your R or Python script sends a question and prints the reply</td><td>Get an API key, install one package</td><td>Yes, only what you send</td></tr>
+    <tr><td><b>3. Local model</b></td><td>Same as route 2, but the AI runs on your own machine</td><td>Install Ollama, download a model</td><td><mark>No</mark></td></tr>
+  </table></div>
+  <div class="analogy"><b>What's an API?</b> An API (application programming interface) is a service counter for software. Your code walks up, hands over a written question, and gets a written answer back. An <b>API key</b> is your staff ID card for that counter: it proves who's asking and who pays. Treat it like a password.</div>
+
+  <h3>Pick your workspace</h3>
+  <div class="tabs" role="tablist" id="envTabs">
+    <button class="tab" role="tab" aria-selected="true" data-env="jupyter" type="button">Jupyter</button>
+    <button class="tab" role="tab" aria-selected="false" data-env="rstudio" type="button">RStudio</button>
+    <button class="tab" role="tab" aria-selected="false" data-env="vscode" type="button">VS Code</button>
+    <button class="tab" role="tab" aria-selected="false" data-env="positron" type="button">Positron</button>
+  </div>
+
+  <div class="env-panel" data-panel="jupyter">
+    <ol class="steps">
+      <li><div><b>Install Jupyter AI</b>In a terminal: <span class="inline-code">pip install jupyter-ai</span>. This adds an AI chat panel to the side of JupyterLab.</div></li>
+      <li><div><b>Choose a model and add your key</b>Open the chat panel's settings, pick a provider (Claude, GPT, Gemini or a local Ollama model) and enter its API key.</div></li>
+      <li><div><b>Ask in plain language</b>Select a cell, then ask "explain this code" or "why does this cell fail?". The assistant sees the code you share with it.</div></li>
+      <li><div><b>Optional: AI inside a cell</b>Install <span class="inline-code">pip install jupyter-ai-magic-commands</span>, run <span class="inline-code">%load_ext jupyter_ai_magic_commands</span>, then <span class="inline-code">%ai list</span> to see available models. Start a cell with <span class="inline-code">%%ai anthropic/claude-sonnet-5-5</span> (or another listed model) and type your question below it.</div></li>
+    </ol>
+    <p class="note">Jupyter notebooks are also the standard format in Google Colab, which has its own built-in Gemini assistant.</p>
+  </div>
+
+  <div class="env-panel" data-panel="rstudio" hidden>
+    <ol class="steps">
+      <li><div><b>GitHub Copilot (built in)</b>Go to <i>Tools → Global Options → Copilot</i> and sign in. Copilot suggests the next lines of code as you type. Requires a Copilot licence.</div></li>
+      <li><div><b>Posit Assistant</b>Posit's chat assistant, built into current RStudio. It reads your live R session, including loaded data frames. Connect it to Ollama (free, local), Google Gemini, OpenAI, Anthropic, or the paid Posit AI Pass. Step-by-step setup is in Chapter 14.</div></li>
+      <li><div><b>The ellmer package (any model)</b><span class="inline-code">install.packages("ellmer")</span> lets your R code talk to Claude, GPT, Gemini or a local Ollama model. See the code builder below.</div></li>
+      <li><div><b>Chat in the console</b>After creating a chat with ellmer, run <span class="inline-code">live_console(chat)</span> to talk to the model directly in the RStudio console.</div></li>
+    </ol>
+  </div>
+
+  <div class="env-panel" data-panel="vscode" hidden>
+    <ol class="steps">
+      <li><div><b>Add language support</b>Install the <i>Python</i> and <i>Jupyter</i> extensions. For R, install the <i>R</i> extension and run <span class="inline-code">install.packages("languageserver")</span> in R.</div></li>
+      <li><div><b>Add an AI assistant extension</b>Step-by-step guides for Codex and Claude Code are in Chapter 14. Common choices: <b>GitHub Copilot Chat</b> (lets you switch between several models), <b>Claude Code</b> (Anthropic), <b>Gemini Code Assist</b> (Google), or <b>Continue</b> (open source, works with your own API keys or a local Ollama model).</div></li>
+      <li><div><b>Work in context</b>Open a <span class="inline-code">.py</span>, <span class="inline-code">.R</span> or <span class="inline-code">.ipynb</span> file, select some code, and ask "explain", "add comments" or "fix this error".</div></li>
+      <li><div><b>Review every change</b>Assistants can edit files directly. Read the proposed change before accepting it, the same way you'd review a colleague's edit.</div></li>
+    </ol>
+  </div>
+
+  <div class="env-panel" data-panel="positron" hidden>
+    <ol class="steps">
+      <li><div><b>What Positron is</b>Posit's newer editor, built for R and Python data work in one place. It looks like VS Code but is designed for data analysis.</div></li>
+      <li><div><b>Posit Assistant</b>From Positron 2026.07, Posit Assistant replaces the older Positron Assistant. Run <i>Configure Language Model Providers</i> from the Command Palette to connect Anthropic, OpenAI, Gemini, Ollama, GitHub Copilot and others.</div></li>
+      <li><div><b>Posit AI Pass</b>The same paid subscription as RStudio can power the assistant and its code suggestions.</div></li>
+      <li><div><b>Same API code works</b>ellmer (R) and the Python packages below work in Positron unchanged.</div></li>
+    </ol>
+  </div>
+
+  <h3>Choosing a model</h3>
+  <p>Different companies make different AI models. For explaining code and results, all the major ones do a good job. Your choice usually comes down to what your organisation has approved and paid for.</p>
+  <div class="tbl-wrap"><table>
+    <tr><th>Provider</th><th>Model family</th><th>R (ellmer)</th><th>Python package</th><th>Key setting</th></tr>
+    <tr><td>Anthropic</td><td>Claude</td><td><span class="inline-code">chat_anthropic()</span></td><td><span class="inline-code">anthropic</span></td><td><span class="inline-code">ANTHROPIC_API_KEY</span></td></tr>
+    <tr><td>OpenAI</td><td>GPT</td><td><span class="inline-code">chat_openai()</span></td><td><span class="inline-code">openai</span></td><td><span class="inline-code">OPENAI_API_KEY</span></td></tr>
+    <tr><td>Google</td><td>Gemini</td><td><span class="inline-code">chat_google_gemini()</span></td><td><span class="inline-code">google-genai</span></td><td><span class="inline-code">GEMINI_API_KEY</span></td></tr>
+    <tr><td>Your own computer</td><td>Open models via Ollama (Llama, Gemma, Qwen…)</td><td><span class="inline-code">chat_ollama()</span></td><td><span class="inline-code">ollama</span></td><td>None needed</td></tr>
+  </table></div>
+  <p class="note">Model names change often. Where the code below shows <span class="inline-code">&lt;model-name&gt;</span>, copy a current name from the provider's model list. Free tiers may allow the provider to use your inputs to improve their models, so never use them for work data.</p>
+
+  <h3>Code builder: ask AI to interpret your results from code</h3>
+  <p>A common job: you've run an analysis and want a plain-English explanation. Choose your language and model; the code and its translation update together.</p>
+  <div class="picker">
+    <div class="picker-row">
+      <div class="grp"><span class="label">Language</span><div class="tabs" id="apiLang">
+        <button class="tab" aria-selected="true" data-v="py" type="button">Python</button>
+        <button class="tab" aria-selected="false" data-v="r" type="button">R</button></div></div>
+      <div class="grp"><span class="label">Model</span><div class="tabs" id="apiProv">
+        <button class="tab" aria-selected="true" data-v="claude" type="button">Claude</button>
+        <button class="tab" aria-selected="false" data-v="gpt" type="button">GPT</button>
+        <button class="tab" aria-selected="false" data-v="gemini" type="button">Gemini</button>
+        <button class="tab" aria-selected="false" data-v="local" type="button">Local (Ollama)</button></div></div>
+    </div>
+    <div class="setup" id="apiSetup"></div>
+    <div class="explainer" id="apiCode"></div>
+  </div>
+
+  <h3>Storing your API key safely</h3>
+  <div class="tbl-wrap"><table>
+    <tr><th>Where</th><th>How</th></tr>
+    <tr><td><b>R / RStudio</b></td><td>Run <span class="inline-code">usethis::edit_r_environ()</span>, add a line such as <span class="inline-code">ANTHROPIC_API_KEY=your-key</span>, save, and restart R.</td></tr>
+    <tr><td><b>Python (Windows)</b></td><td>In Command Prompt: <span class="inline-code">setx ANTHROPIC_API_KEY "your-key"</span>, then reopen your editor.</td></tr>
+    <tr><td><b>Python (Mac/Linux)</b></td><td>Add <span class="inline-code">export ANTHROPIC_API_KEY="your-key"</span> to your shell profile, or keep it in a <span class="inline-code">.env</span> file read by <span class="inline-code">python-dotenv</span>.</td></tr>
+  </table></div>
+  <div class="note bad"><span class="label">Never</span>Type a key into notebook code, email it, put it in a screenshot, or upload it to GitHub. If one leaks, delete it in the provider's dashboard and create a new one.</div>
+
+  <h3>Good habits for API use at work</h3>
+  <ul class="plain">
+    <li><b>Send summaries, not records.</b> Model outputs and summary tables are usually fine; raw citizen rows are not.</li>
+    <li><b>Check your agreement.</b> Enterprise or government contracts often include stronger data-retention terms than personal accounts.</li>
+    <li><b>Use a local model for sensitive work</b>, if your policy allows AI at all on that data. Ollama keeps everything on your machine.</li>
+    <li><b>Set a spending limit.</b> APIs charge per amount of text (counted in "tokens"). Set a monthly cap in the provider's dashboard.</li>
+    <li><b>Keep the prompt with the code.</b> Prompts saved in your script make the analysis repeatable and auditable.</li>
+  </ul>
+  <div class="quiz" data-quiz="q8"></div>
+</section>
+
+<!-- GUIDES -->
+<section class="chapter" id="guides">
+  <span class="eyebrow">Chapter 14 · Hands-on setup</span>
+  <h2>Step-by-step setup guides</h2>
+  <p>This chapter walks you through connecting real AI models to the tools from Chapter 13, one click at a time. Choose the guide that matches your setup. Each one ends with a short test using the grievance data from Chapter 10.</p>
+  <div class="note"><span class="label">About the screens</span>The screens in this chapter are simplified drawings, not photographs. Button names and menus match the official documentation as of October 2026. Software updates often, so your screen may look a little different. Look for the same words, and you'll find the right place.</div>
+
+  <h3>Which guide do I need?</h3>
+  <div class="tbl-wrap"><table>
+    <tr><th>Guide</th><th>Cost</th><th>Data leaves your computer?</th><th>Best for</th></tr>
+    <tr><td><b>RStudio + Ollama</b></td><td>Free</td><td>No</td><td>Sensitive work, no internet, learning</td></tr>
+    <tr><td><b>RStudio + Gemini</b></td><td>Free tier, then pay per use</td><td>Yes</td><td>Trying cloud AI cheaply (public data only on the free tier)</td></tr>
+    <tr><td><b>RStudio + ChatGPT models</b></td><td>Pay per use (API)</td><td>Yes</td><td>Teams that already use OpenAI</td></tr>
+    <tr><td><b>VS Code + ChatGPT (Codex)</b></td><td>ChatGPT Plus or higher, or API key</td><td>Yes</td><td>Python users with a ChatGPT plan</td></tr>
+    <tr><td><b>VS Code + Claude (Claude Code)</b></td><td>Claude Pro or higher, or Console account</td><td>Yes</td><td>Multi-file projects, careful code review</td></tr>
+    <tr><td><b>Claude Code + Ollama + Gemma 4</b></td><td>Free</td><td>No</td><td>Claude Code's workflow with a model that runs locally</td></tr>
+  </table></div>
+
+  <!-- PART A -->
+  <h3>Part A · Turn on Posit Assistant in RStudio (do this once)</h3>
+  <p>Posit Assistant is the chat assistant built into RStudio. It can see your R session, including the data frames you've loaded, so it gives answers about <i>your</i> columns, not generic ones. It doesn't come with its own AI model. You connect one in Part B.</p>
+
+  <div class="gstep"><span class="n">A1</span><div>
+    <h4>Update RStudio</h4>
+    <p>Posit Assistant is in the current release of RStudio. Go to <b>Help → Check for Updates</b>, or download the latest version from posit.co/downloads. On an office computer, your IT team may need to do this for you.</p>
+  </div></div>
+
+  <div class="gstep"><span class="n">A2</span><div>
+    <h4>Open the Posit Assistant sidebar</h4>
+    <p>Look at the <b>top-right corner of the RStudio toolbar</b> and click the Posit Assistant icon. A sidebar opens on the right.</p>
+    <figure class="shot"><div class="shot-scroll"><div class="win">
+      <div class="win-bar"><i></i><i></i><i></i><span>RStudio — grievance-analysis</span></div>
+      <div class="win-tools"><span>File</span><span>Edit</span><span>Code</span><span>View</span><span>Session</span><span>Tools</span><span>Help</span><span class="sp"></span><span class="ico">⌕</span><span class="ico hl">✦ Assistant</span><span class="pin">1</span></div>
+      <div class="win-body" style="grid-template-columns:1.3fr 1fr .9fr">
+        <div class="pane"><h5>analysis.R</h5><div class="codeline">library(dplyr)
+df &lt;- read.csv("grievances.csv")
+nrow(df)   <span class="c"># 72</span></div>
+          <h5 style="margin-top:12px">Console</h5><div class="codeline">&gt; nrow(df)
+[1] 72</div></div>
+        <div class="pane"><h5>Environment</h5><div class="codeline">df   72 obs. of 6 variables</div><h5 style="margin-top:12px">Files · Plots</h5><div class="codeline">grievances.csv
+analysis.R</div></div>
+        <div class="pane hl" style="background:var(--ui-panel)"><h5>Posit Assistant <span class="pin">2</span></h5><p style="margin:0;color:var(--ui-mute)">The assistant sidebar opens here.</p></div>
+      </div></div></div>
+      <figcaption><span class="pins"><span><span class="pin">1</span>Posit Assistant icon, top-right of the toolbar</span><span><span class="pin">2</span>The sidebar that opens</span></span></figcaption>
+    </figure>
+  </div></div>
+
+  <div class="gstep"><span class="n">A3</span><div>
+    <h4>Install Posit Assistant</h4>
+    <p>The first time, the sidebar shows an <b>Install Posit Assistant</b> button. Click it and wait a minute. If RStudio asks whether to trust the workspace, choose yes for your own project folders.</p>
+    <figure class="shot"><div class="shot-scroll"><div class="win" style="min-width:420px">
+      <div class="win-bar"><i></i><i></i><i></i><span>Posit Assistant</span></div>
+      <div style="padding:26px;display:flex;flex-direction:column;gap:12px;align-items:center;text-align:center">
+        <b style="font-size:14px">Posit Assistant is not installed yet</b>
+        <span style="color:var(--ui-mute)">Chat with AI about your code and data.</span>
+        <span style="display:flex;gap:8px;align-items:center"><span class="ui-btn hl">Install Posit Assistant</span><span class="pin">1</span></span>
+      </div></div></div>
+      <figcaption><span class="pins"><span><span class="pin">1</span>Click once. It installs inside RStudio; you don't need admin rights for this step.</span></span></figcaption>
+    </figure>
+  </div></div>
+
+  <div class="gstep"><span class="n">A4</span><div>
+    <h4>Open the provider list</h4>
+    <p>Click <b>Configure provider</b>. Later you can reach the same list from the gear icon in the sidebar → <b>Configure AI providers</b>. Each provider has a <b>Connect</b> button. Now go to Part B and choose one.</p>
+    <figure class="shot"><div class="shot-scroll"><div class="win">
+      <div class="win-bar"><i></i><i></i><i></i><span>Configure AI providers</span></div>
+      <div class="dim-bg"><div class="modal">
+        <div class="modal-h"><span>Providers</span><span style="color:var(--ui-mute)">✕</span></div>
+        <div class="ui-row"><span class="grow"><b>Posit AI Pass</b><small>Sign in with your Posit account (paid)</small></span><span class="ui-btn ghost">Connect</span></div>
+        <div class="ui-row"><span class="grow"><b>Anthropic</b><small>API key</small></span><span class="ui-btn ghost">Connect</span></div>
+        <div class="ui-row hl"><span class="grow"><b>Google Gemini</b><small>API key</small></span><span class="ui-btn ghost">Connect</span><span class="pin">2</span></div>
+        <div class="ui-row hl"><span class="grow"><b>Ollama</b><small>No credentials (local)</small></span><span class="ui-btn ghost">Connect</span><span class="pin">1</span></div>
+        <div class="ui-row hl"><span class="grow"><b>OpenAI</b><small>API key</small></span><span class="ui-btn ghost">Connect</span><span class="pin">3</span></div>
+        <div class="ui-row"><span class="grow" style="color:var(--ui-mute)">… more providers</span></div>
+      </div></div></div></div>
+      <figcaption><span class="pins"><span><span class="pin">1</span>Ollama: free, runs on your computer (Guide B1)</span><span><span class="pin">2</span>Google Gemini (Guide B2)</span><span><span class="pin">3</span>OpenAI, the company behind ChatGPT (Guide B3)</span></span></figcaption>
+    </figure>
+  </div></div>
+
+  <!-- GUIDE PICKER -->
+  <h3>Part B and beyond · Pick your guide</h3>
+  <div class="guide-tabs" role="tablist" id="guideTabs">
+    <button class="tab" role="tab" aria-selected="true" data-guide="ollama" type="button">B1 · RStudio + Ollama<small>Free · local</small></button>
+    <button class="tab" role="tab" aria-selected="false" data-guide="gemini" type="button">B2 · RStudio + Gemini<small>Google · cloud</small></button>
+    <button class="tab" role="tab" aria-selected="false" data-guide="openai" type="button">B3 · RStudio + ChatGPT<small>OpenAI · cloud</small></button>
+    <button class="tab" role="tab" aria-selected="false" data-guide="codex" type="button">C1 · VS Code + ChatGPT<small>Codex extension</small></button>
+    <button class="tab" role="tab" aria-selected="false" data-guide="claude" type="button">C2 · VS Code + Claude<small>Claude Code extension</small></button>
+    <button class="tab" role="tab" aria-selected="false" data-guide="gemma" type="button">D · Claude Code + Gemma 4<small>Ollama · fully local</small></button>
+  </div>
+
+  <!-- B1 OLLAMA -->
+  <div class="gpanel" data-gpanel="ollama">
+    <div class="need"><div><span class="label">You need</span>RStudio with Part A done</div><div><span class="label">Computer</span>16 GB RAM is comfortable; 8 GB works with small models</div><div><span class="label">Cost</span>Free. Nothing leaves your machine.</div></div>
+
+    <div class="gstep"><span class="n">1</span><div>
+      <h4>Install Ollama</h4>
+      <p>Download the installer for Windows, Mac or Linux from <b>ollama.com</b> and run it. When it finishes, Ollama runs quietly in the background. On Windows you'll see a small llama icon near the clock.</p>
+    </div></div>
+
+    <div class="gstep"><span class="n">2</span><div>
+      <h4>Download a model</h4>
+      <p>Open a terminal: <b>Command Prompt</b> or <b>PowerShell</b> on Windows, <b>Terminal</b> on Mac. You can also use the <b>Terminal</b> tab inside RStudio, next to the Console. Then type:</p>
+      <div class="cmd"><div class="cmd-h"><span>Terminal</span><button class="btn copy" data-target="g1" type="button">Copy</button></div><pre id="g1">ollama pull gemma4:e4b
+ollama list</pre></div>
+      <figure class="shot"><div class="shot-scroll"><div class="term" style="min-width:520px">&gt; ollama pull gemma4:e4b
+<span class="dim">pulling manifest
+pulling 4c27e0f5b5ad... 100% ▕████████████████▏ 9.6 GB</span>
+<span class="ok">success</span>
+&gt; ollama list
+NAME           ID              SIZE      MODIFIED
+gemma4:e4b     c6eb396dbd59    9.6 GB    5 seconds ago</div></div>
+        <figcaption>The download is large, so use office Wi-Fi rather than a mobile hotspot. Only the first download takes a while; after that the model is stored on your computer.</figcaption>
+      </figure>
+      <div class="tbl-wrap"><table>
+        <tr><th>Model</th><th>Download</th><th>Suits</th></tr>
+        <tr><td><span class="inline-code">gemma4:e2b</span></td><td class="num">≈ 7 GB</td><td>Older laptops, no graphics card</td></tr>
+        <tr><td><span class="inline-code">gemma4:e4b</span></td><td class="num">≈ 10 GB</td><td>Most office laptops (good starting point)</td></tr>
+        <tr><td><span class="inline-code">gemma4:26b</span></td><td class="num">≈ 16 GB+</td><td>Powerful desktops with a 24 GB graphics card or 32 GB Mac</td></tr>
+        <tr><td><span class="inline-code">llama3.2</span></td><td class="num">≈ 2 GB</td><td>Very small and fast, but simpler answers</td></tr>
+      </table></div>
+    </div></div>
+
+    <div class="gstep"><span class="n">3</span><div>
+      <h4>Check Ollama is running</h4>
+      <p>Open <span class="inline-code">http://localhost:11434</span> in your web browser. If you see the words <b>"Ollama is running"</b>, you're ready. If not, start the Ollama app again, or type <span class="inline-code">ollama serve</span> in a terminal.</p>
+    </div></div>
+
+    <div class="gstep"><span class="n">4</span><div>
+      <h4>Connect Ollama in RStudio</h4>
+      <p>In the provider list from step A4, click <b>Connect</b> next to <b>Ollama</b>. You don't need a key. Posit Assistant looks for Ollama at <span class="inline-code">http://localhost:11434</span> automatically.</p>
+      <figure class="shot"><div class="shot-scroll"><div class="win">
+        <div class="win-bar"><i></i><i></i><i></i><span>Configure AI providers</span></div>
+        <div class="dim-bg"><div class="modal">
+          <div class="modal-h"><span>Providers</span><span style="color:var(--ui-mute)">✕</span></div>
+          <div class="ui-row hl"><span class="grow"><b>Ollama</b><small>http://localhost:11434 · 1 model found</small></span><span class="ui-tag ok">Connected</span><span class="pin">1</span></div>
+          <div class="ui-row"><span class="grow"><b>OpenAI</b><small>API key</small></span><span class="ui-btn ghost">Connect</span></div>
+        </div></div></div></div>
+        <figcaption><span class="pins"><span><span class="pin">1</span>"Connected" with your downloaded model listed. If it says no models were found, go back to step 2.</span></span></figcaption>
+      </figure>
+    </div></div>
+
+    <div class="gstep"><span class="n">5</span><div>
+      <h4>Choose the model and ask a question</h4>
+      <p>At the bottom of the chat box, click the model name and pick <b>gemma4:e4b</b>. Then load the Chapter 10 data in the Console and ask about it.</p>
+      <figure class="shot"><div class="shot-scroll"><div class="win" style="min-width:460px">
+        <div class="win-bar"><i></i><i></i><i></i><span>Posit Assistant</span></div>
+        <div style="padding:12px">
+          <div class="bubble me"><b>You</b>Using the data frame df, which district has the lowest % resolved within 30 days? Give me dplyr code.</div>
+          <div class="bubble"><b>Assistant</b>df has 72 rows with columns district, month, population_lakh, received, resolved_30d and median_days. This groups by district and calculates the rate:
+<div class="codeline" style="margin-top:6px">df |&gt; group_by(district) |&gt;
+  summarise(pct = 100 * sum(resolved_30d) / sum(received)) |&gt;
+  arrange(pct)</div></div>
+          <div class="promptbox"><span style="color:var(--ui-mute)">Ask about your code or data…</span><div class="foot"><span class="hl" style="padding:2px 6px">gemma4:e4b ▾</span><span class="pin">1</span><span style="margin-left:auto">Send ↵</span></div></div>
+        </div></div></div>
+        <figcaption><span class="pins"><span><span class="pin">1</span>Model picker: switch between any connected provider's models here</span></span></figcaption>
+      </figure>
+      <p>Run the code yourself. Shivgarh should come first at 57.2%, matching Chapter 10.</p>
+    </div></div>
+
+    <div class="tbl-wrap"><table>
+      <tr><th>Problem</th><th>Fix</th></tr>
+      <tr><td>Ollama doesn't appear as connected</td><td>Check step 3. Ollama must be running before you click Connect.</td></tr>
+      <tr><td>Very slow answers</td><td>Switch to a smaller model (<span class="inline-code">gemma4:e2b</span> or <span class="inline-code">llama3.2</span>) and close other heavy programs.</td></tr>
+      <tr><td>Ollama runs on a different machine</td><td>Set <span class="inline-code">OLLAMA_ENDPOINT</span> to that machine's address before starting RStudio.</td></tr>
+      <tr><td>The answer is wrong or vague</td><td>Local models are smaller than cloud ones. Ask simpler, more specific questions, and always run and check the code.</td></tr>
+    </table></div>
+  </div>
+
+  <!-- B2 GEMINI -->
+  <div class="gpanel" data-gpanel="gemini" hidden>
+    <div class="need"><div><span class="label">You need</span>RStudio with Part A done, and a Google account</div><div><span class="label">Cost</span>Free tier with limits; paid tier for heavier use</div><div><span class="label">Data</span>Sent to Google. On the free tier, Google may use it to improve its models, so use public data only.</div></div>
+
+    <div class="gstep"><span class="n">1</span><div>
+      <h4>Create a Gemini API key</h4>
+      <p>Go to <b>aistudio.google.com</b>, sign in, and click <b>Get API key</b>, then <b>Create API key</b>. Google may ask you to choose or create a Cloud project; the default is fine.</p>
+      <figure class="shot"><div class="shot-scroll"><div class="win">
+        <div class="win-bar"><i></i><i></i><i></i><span>aistudio.google.com — API keys</span></div>
+        <div style="padding:14px;display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;justify-content:space-between;align-items:center"><b style="font-size:14px">API keys</b><span style="display:flex;gap:8px;align-items:center"><span class="ui-btn hl">Create API key</span><span class="pin">1</span></span></div>
+          <div class="ui-row" style="border:1px solid var(--ui-line);border-radius:6px"><span class="grow"><b>Gemini API key</b><small>Project: my-first-project · created today</small></span><span class="ui-field hl">AIza••••••••••••3kQ</span><span class="ico">⧉</span><span class="pin">2</span></div>
+        </div></div></div>
+        <figcaption><span class="pins"><span><span class="pin">1</span>Create the key</span><span><span class="pin">2</span>Copy it straight away and keep it somewhere safe. Treat it like a password.</span></span></figcaption>
+      </figure>
+    </div></div>
+
+    <div class="gstep"><span class="n">2</span><div>
+      <h4>Paste the key into RStudio</h4>
+      <p>In the provider list (step A4), click <b>Connect</b> next to <b>Google Gemini</b>, paste the key and save. RStudio stores the key separately from your project files, so it won't end up in your code.</p>
+      <figure class="shot"><div class="shot-scroll"><div class="win">
+        <div class="win-bar"><i></i><i></i><i></i><span>Configure AI providers</span></div>
+        <div class="dim-bg"><div class="modal">
+          <div class="modal-h"><span>Connect Google Gemini</span><span style="color:var(--ui-mute)">✕</span></div>
+          <div style="padding:12px;display:flex;flex-direction:column;gap:8px">
+            <label style="font-weight:700;font-size:12px">API key <span class="pin">1</span></label>
+            <span class="ui-field hl">AIza••••••••••••••••••••••3kQ</span>
+            <span style="display:flex;justify-content:flex-end;gap:8px;align-items:center"><span class="ui-btn ghost">Cancel</span><span class="ui-btn">Save</span><span class="pin">2</span></span>
+          </div></div></div></div></div>
+        <figcaption><span class="pins"><span><span class="pin">1</span>Paste the key</span><span><span class="pin">2</span>Save. The Gemini models now appear in the chat model picker.</span></span></figcaption>
+      </figure>
+      <p class="note"><b>Alternative:</b> set <span class="inline-code">GEMINI_API_KEY</span> in your .Renviron file (<span class="inline-code">usethis::edit_r_environ()</span>) and restart RStudio. Environment variables must be set <i>before</i> RStudio starts.</p>
+    </div></div>
+
+    <div class="gstep"><span class="n">3</span><div>
+      <h4>Pick a Gemini model and test it</h4>
+      <p>Choose a Gemini model from the picker at the bottom of the chat box. "Flash" models are faster and cheaper; "Pro" models are stronger. Try:</p>
+      <div class="cmd"><div class="cmd-h"><span>Ask the assistant</span><button class="btn copy" data-target="g2" type="button">Copy</button></div><pre id="g2">Look at the data frame df. Write ggplot2 code for a line chart of total
+grievances received per month, with the July–August months shaded.
+Explain each line in plain English.</pre></div>
+    </div></div>
+
+    <div class="tbl-wrap"><table>
+      <tr><th>Problem</th><th>Fix</th></tr>
+      <tr><td>"API key not valid"</td><td>Copy the key again, with no spaces at the start or end.</td></tr>
+      <tr><td>"Quota exceeded" or "rate limit"</td><td>You've hit the free-tier limit. Wait a minute, or turn on billing in Google AI Studio.</td></tr>
+      <tr><td>Blocked at work</td><td>Your network may block Google AI Studio. Ask IT, or use Ollama (Guide B1).</td></tr>
+    </table></div>
+  </div>
+
+  <!-- B3 OPENAI -->
+  <div class="gpanel" data-gpanel="openai" hidden>
+    <div class="need"><div><span class="label">You need</span>RStudio with Part A done, and an OpenAI developer account</div><div><span class="label">Cost</span>Pay per use. Add a small credit (e.g. US$5) to start.</div><div><span class="label">Data</span>Sent to OpenAI</div></div>
+    <div class="note warn"><span class="label">Important</span>A ChatGPT Plus subscription is <b>not</b> the same as API access. RStudio uses the <b>OpenAI API</b>, which is billed separately at platform.openai.com. These are the same models behind ChatGPT.</div>
+
+    <div class="gstep"><span class="n">1</span><div>
+      <h4>Create an API key and set a spending limit</h4>
+      <p>Go to <b>platform.openai.com</b> and sign in. Open <b>API keys</b> and click <b>Create new secret key</b>. Give it a name like "RStudio", then copy it. The key is shown only once. Under <b>Billing</b>, add credit and set a monthly <b>usage limit</b> so costs can't run away.</p>
+      <figure class="shot"><div class="shot-scroll"><div class="win">
+        <div class="win-bar"><i></i><i></i><i></i><span>platform.openai.com — API keys</span></div>
+        <div style="display:grid;grid-template-columns:150px 1fr">
+          <div class="pane" style="background:var(--ui-panel)"><div class="codeline">Dashboard
+<span class="hl">API keys</span>  <span class="pin">1</span>
+Usage
+<span class="hl">Billing</span>   <span class="pin">3</span></div></div>
+          <div class="pane"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><b style="font-size:14px">API keys</b><span style="display:flex;gap:8px;align-items:center"><span class="ui-btn hl">+ Create new secret key</span><span class="pin">2</span></span></div>
+            <div class="ui-row" style="border:1px solid var(--ui-line);border-radius:6px"><span class="grow"><b>RStudio</b><small>sk-…Xy7Q · created today</small></span><span class="ui-tag">All permissions</span></div></div>
+        </div></div></div>
+        <figcaption><span class="pins"><span><span class="pin">1</span>API keys page</span><span><span class="pin">2</span>Create the key; copy it immediately</span><span><span class="pin">3</span>Billing: add credit and set a usage limit</span></span></figcaption>
+      </figure>
+    </div></div>
+
+    <div class="gstep"><span class="n">2</span><div>
+      <h4>Connect OpenAI in RStudio</h4>
+      <p>In the provider list (step A4), click <b>Connect</b> next to <b>OpenAI</b>, paste the key and save. This is the same screen as the Gemini guide, but with your <span class="inline-code">sk-…</span> key.</p>
+      <p class="note"><b>Alternative:</b> add <span class="inline-code">OPENAI_API_KEY=sk-…</span> to .Renviron via <span class="inline-code">usethis::edit_r_environ()</span>, then restart RStudio.</p>
+    </div></div>
+
+    <div class="gstep"><span class="n">3</span><div>
+      <h4>Pick a model and test it</h4>
+      <p>Choose an OpenAI model from the chat model picker. Smaller "mini" models are cheaper and fine for explaining code. Try:</p>
+      <div class="cmd"><div class="cmd-h"><span>Ask the assistant</span><button class="btn copy" data-target="g3" type="button">Copy</button></div><pre id="g3">Using df, test whether the share of grievances resolved within 30 days
+differs between districts. Choose a suitable test, give me the R code,
+and explain the result for a non-technical Collector.</pre></div>
+      <p>Compare the answer with Chapter 10: χ² = 189.7, 5 degrees of freedom, p &lt; 0.001.</p>
+    </div></div>
+
+    <div class="tbl-wrap"><table>
+      <tr><th>Problem</th><th>Fix</th></tr>
+      <tr><td>"Insufficient quota" or error 429</td><td>Add credit under Billing. A new account has no free credit.</td></tr>
+      <tr><td>"Incorrect API key"</td><td>Create a new key and paste it again. Old keys may have been deleted.</td></tr>
+      <tr><td>Costs worry you</td><td>Use a mini model, set a low usage limit, and check the Usage page weekly.</td></tr>
+    </table></div>
+  </div>
+
+  <!-- C1 CODEX -->
+  <div class="gpanel" data-gpanel="codex" hidden>
+    <div class="need"><div><span class="label">You need</span>VS Code with the Python (and/or R) extension from Chapter 13</div><div><span class="label">Account</span>ChatGPT Plus or higher, or an OpenAI API key</div><div><span class="label">Extension</span>"Codex" by OpenAI (ID <span class="inline-code">openai.chatgpt</span>)</div></div>
+
+    <div class="gstep"><span class="n">1</span><div>
+      <h4>Install the Codex extension</h4>
+      <p>Press <b>Ctrl+P</b> (Mac: <b>Cmd+P</b>), type the line below and press Enter. Or open the Extensions view (<b>Ctrl+Shift+X</b>), search <b>Codex</b> and pick the one published by <b>OpenAI</b>.</p>
+      <div class="cmd"><div class="cmd-h"><span>VS Code Quick Open</span><button class="btn copy" data-target="g4" type="button">Copy</button></div><pre id="g4">ext install openai.chatgpt</pre></div>
+      <figure class="shot"><div class="shot-scroll"><div class="win">
+        <div class="win-bar"><i></i><i></i><i></i><span>Extensions — Visual Studio Code</span></div>
+        <div style="display:grid;grid-template-columns:44px 1fr">
+          <div class="pane" style="background:var(--ui-panel);display:flex;flex-direction:column;gap:8px;align-items:center;padding:10px 4px"><span class="ico">▤</span><span class="ico">⌕</span><span class="ico hl">⊞</span></div>
+          <div class="pane"><span class="ui-field" style="display:block;margin-bottom:8px">Codex</span>
+            <div class="ui-row hl" style="border-radius:6px"><span class="ico">◎</span><span class="grow"><b>Codex — OpenAI's coding agent</b><small>OpenAI ✓ verified publisher</small></span><span class="ui-btn">Install</span><span class="pin">1</span></div>
+            <div class="ui-row"><span class="ico">◇</span><span class="grow" style="color:var(--ui-mute)">Other similarly named extensions…</span></div></div>
+        </div></div></div>
+        <figcaption><span class="pins"><span><span class="pin">1</span>Check that the publisher is OpenAI before installing. Look-alike extensions exist.</span></span></figcaption>
+      </figure>
+    </div></div>
+
+    <div class="gstep"><span class="n">2</span><div>
+      <h4>Open Codex and sign in</h4>
+      <p>Click the <b>Codex icon</b> in the left sidebar. If you can't see it, open the Command Palette (<b>Ctrl+Shift+P</b>) and run <b>Codex: Open Codex Sidebar</b>. Click <b>Sign in</b> and choose your <b>ChatGPT account</b> (easiest) or an <b>API key</b>.</p>
+      <figure class="shot"><div class="shot-scroll"><div class="win">
+        <div class="win-bar"><i></i><i></i><i></i><span>analysis.py — Visual Studio Code</span></div>
+        <div style="display:grid;grid-template-columns:44px 1fr 1.1fr">
+          <div class="pane" style="background:var(--ui-panel);display:flex;flex-direction:column;gap:8px;align-items:center;padding:10px 4px"><span class="ico">▤</span><span class="ico">⌕</span><span class="ico">⊞</span><span class="ico hl">◎</span><span class="pin">1</span></div>
+          <div class="pane"><h5>analysis.py</h5><div class="codeline">import pandas as pd
+df = pd.read_csv("grievances.csv")
+print(len(df))</div></div>
+          <div class="pane" style="display:flex;flex-direction:column;gap:10px;align-items:center;justify-content:center;text-align:center;padding:22px 12px"><b style="font-size:13px">Welcome to Codex</b>
+            <span style="display:flex;gap:8px;align-items:center"><span class="ui-btn hl">Sign in with ChatGPT</span><span class="pin">2</span></span>
+            <span class="ui-btn ghost">Use API key</span></div>
+        </div></div></div>
+        <figcaption><span class="pins"><span><span class="pin">1</span>Codex icon in the sidebar. You can drag it to the right side so it sits beside your code.</span><span><span class="pin">2</span>A browser window opens for you to approve the sign-in</span></span></figcaption>
+      </figure>
+    </div></div>
+
+    <div class="gstep"><span class="n">3</span><div>
+      <h4>Choose how much Codex may do</h4>
+      <p>Below the chat box is a mode selector. <mark>Start with Chat</mark> while you're learning.</p>
+      <div class="tbl-wrap"><table>
+        <tr><th>Mode</th><th>What Codex can do</th><th>Use when</th></tr>
+        <tr><td><b>Chat</b></td><td>Talk only. No file changes, no commands.</td><td>Asking for explanations and code you'll paste yourself</td></tr>
+        <tr><td><b>Agent</b></td><td>Read and edit files in your folder and run commands</td><td>You're comfortable reviewing its changes</td></tr>
+        <tr><td><b>Agent (full access)</b></td><td>Agent, plus internet access</td><td>Rarely. Avoid on work machines unless IT approves.</td></tr>
+      </table></div>
+      <p>Next to the mode selector is the <b>model picker</b>, which also sets how hard the model "thinks". Higher effort gives better answers but is slower.</p>
+    </div></div>
+
+    <div class="gstep"><span class="n">4</span><div>
+      <h4>Try it: explain and improve a script</h4>
+      <p>Open your analysis file, select the lines you care about, and type:</p>
+      <div class="cmd"><div class="cmd-h"><span>Ask Codex</span><button class="btn copy" data-target="g5" type="button">Copy</button></div><pre id="g5">Explain the selected code line by line in plain English. Then extend it
+to calculate grievances per lakh population and % resolved within 30 days
+by district, sorted worst first. Print the row count after loading.</pre></div>
+      <figure class="shot"><div class="shot-scroll"><div class="win">
+        <div class="win-bar"><i></i><i></i><i></i><span>analysis.py — Visual Studio Code</span></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr">
+          <div class="pane"><h5>analysis.py</h5><div class="codeline"><span class="hl">import pandas as pd
+df = pd.read_csv("grievances.csv")
+print(len(df))</span>   <span class="pin">1</span></div></div>
+          <div class="pane" style="padding:12px">
+            <div class="bubble me"><b>You · analysis.py (lines 1–3)</b>Explain the selected code… then extend it…</div>
+            <div class="bubble"><b>Codex</b>Line 1 loads pandas, a table toolkit. Line 2 reads your CSV into a table called df. Line 3 prints the number of rows (72)…</div>
+            <div class="promptbox"><span style="color:var(--ui-mute)">Ask Codex…</span><div class="foot"><span class="hl" style="padding:2px 6px">Chat ▾</span><span class="pin">2</span><span style="padding:2px 6px;border:1px solid var(--ui-line);border-radius:4px">Model · medium ▾</span><span class="pin">3</span></div></div>
+          </div></div></div></div>
+        <figcaption><span class="pins"><span><span class="pin">1</span>Selected code is sent as context</span><span><span class="pin">2</span>Mode selector</span><span><span class="pin">3</span>Model and reasoning effort</span></span></figcaption>
+      </figure>
+      <p class="note"><b>Tip:</b> before letting Agent mode edit files, save a copy of your folder (or commit it in Git) so you can always go back.</p>
+    </div></div>
+  </div>
+
+  <!-- C2 CLAUDE CODE -->
+  <div class="gpanel" data-gpanel="claude" hidden>
+    <div class="need"><div><span class="label">You need</span>VS Code 1.94 or later</div><div><span class="label">Account</span>Claude Pro, Max, Team or Enterprise, or a Claude Console account</div><div><span class="label">Extension</span>"Claude Code" by Anthropic (ID <span class="inline-code">anthropic.claude-code</span>)</div></div>
+
+    <div class="gstep"><span class="n">1</span><div>
+      <h4>Install the Claude Code extension</h4>
+      <p>Press <b>Ctrl+Shift+X</b> (Mac: <b>Cmd+Shift+X</b>) to open Extensions, search <b>Claude Code</b>, check the publisher is <b>Anthropic</b>, and click <b>Install</b>. If it doesn't appear afterwards, run <b>Developer: Reload Window</b> from the Command Palette.</p>
+    </div></div>
+
+    <div class="gstep"><span class="n">2</span><div>
+      <h4>Open Claude and sign in</h4>
+      <p>Open any file. In the <b>top-right corner of the editor</b>, click the <b>Spark icon</b> (✳). There's also one in the left Activity Bar, which lists your past sessions. The first time, click <b>Sign in</b> and approve in your browser.</p>
+      <figure class="shot"><div class="shot-scroll"><div class="win">
+        <div class="win-bar"><i></i><i></i><i></i><span>analysis.R — Visual Studio Code</span></div>
+        <div style="display:grid;grid-template-columns:44px 1fr 1fr">
+          <div class="pane" style="background:var(--ui-panel);display:flex;flex-direction:column;gap:8px;align-items:center;padding:10px 4px"><span class="ico">▤</span><span class="ico">⌕</span><span class="ico">⊞</span><span class="ico">✳</span><span class="pin">2</span></div>
+          <div class="pane"><div style="display:flex;justify-content:space-between;align-items:center"><h5 style="margin:0">analysis.R</h5><span style="display:flex;gap:6px;align-items:center"><span class="ico hl">✳</span><span class="pin">1</span></span></div><div class="codeline" style="margin-top:6px">library(dplyr)
+df &lt;- read.csv("grievances.csv")
+nrow(df)</div></div>
+          <div class="pane" style="display:flex;flex-direction:column;gap:10px;align-items:center;justify-content:center;text-align:center;padding:22px 12px"><b style="font-size:13px">Claude Code</b><span style="color:var(--ui-mute)">Sign in to get started</span>
+            <span style="display:flex;gap:8px;align-items:center"><span class="ui-btn hl">Sign in</span><span class="pin">3</span></span></div>
+        </div></div></div>
+        <figcaption><span class="pins"><span><span class="pin">1</span>Spark icon in the editor toolbar (appears when a file is open)</span><span><span class="pin">2</span>Spark icon in the Activity Bar: your sessions list</span><span><span class="pin">3</span>Sign in with your Claude account in the browser</span></span></figcaption>
+      </figure>
+      <p>After you sign in, a <b>Learn Claude Code</b> checklist appears. Click <b>Show me</b> on each item for a guided tour, or close it.</p>
+    </div></div>
+
+    <div class="gstep"><span class="n">3</span><div>
+      <h4>Give Claude context and ask</h4>
+      <p>Select lines in your file. Claude sees the selection automatically, and the prompt box shows how many lines are selected. Press <b>Alt+K</b> (Mac: <b>Option+K</b>) to insert a reference such as <span class="inline-code">@analysis.R#1-3</span>. Type <b>@</b> followed by a file name to mention other files, for example <span class="inline-code">@grievances.csv</span>.</p>
+      <div class="cmd"><div class="cmd-h"><span>Ask Claude</span><button class="btn copy" data-target="g6" type="button">Copy</button></div><pre id="g6">Using @grievances.csv, extend @analysis.R to: total received and resolved
+by district, add per-lakh and % resolved within 30 days, sort worst first,
+and run a chi-square test. Add a plain-English comment above every line.</pre></div>
+      <figure class="shot"><div class="shot-scroll"><div class="win">
+        <div class="win-bar"><i></i><i></i><i></i><span>Claude Code</span></div>
+        <div style="padding:12px">
+          <div class="bubble me"><b>You</b>Using <u>@grievances.csv</u>, extend <u>@analysis.R</u> to total received and resolved by district…</div>
+          <div class="bubble"><b>Claude</b>I read grievances.csv (72 rows, 6 columns). I'll add a summary by district and a chi-square test to analysis.R. Here's the proposed change for you to review.</div>
+          <div class="promptbox"><span style="color:var(--ui-mute)">Ask Claude to edit, explain or run…  <span class="ui-tag">3 lines selected</span></span><div class="foot"><span class="hl" style="padding:2px 6px">Manual ▾</span><span class="pin">1</span><span style="padding:2px 6px;border:1px solid var(--ui-line);border-radius:4px">Model ▾</span><span class="pin">2</span><span style="margin-left:auto">/ commands · @ files</span></div></div>
+        </div></div></div>
+        <figcaption><span class="pins"><span><span class="pin">1</span>Permission mode: click to change. <b>Manual</b> asks before every edit, the safest choice while learning.</span><span><span class="pin">2</span>Click the model name (or type <span class="inline-code">/model</span>) to switch models</span></span></figcaption>
+      </figure>
+    </div></div>
+
+    <div class="gstep"><span class="n">4</span><div>
+      <h4>Review the change before accepting</h4>
+      <p>In Manual mode, Claude shows a side-by-side comparison of the old and new file. Accept or reject the whole file, or use <b>Accept this change</b> / <b>Reject this change</b> on each part. You can also edit the proposed text yourself before accepting.</p>
+      <figure class="shot"><div class="shot-scroll"><div class="win">
+        <div class="win-bar"><i></i><i></i><i></i><span>analysis.R (proposed) ↔ analysis.R</span></div>
+        <div style="padding:10px 0"><div class="diff"><span class="ctx">df &lt;- read.csv("grievances.csv")</span><span class="del">- nrow(df)</span><span class="add">+ print(nrow(df))  # should be 72</span><span class="add">+ # Total and rate per district, worst first</span><span class="add">+ s &lt;- df |&gt; group_by(district) |&gt; summarise(received = sum(received), …)</span></div>
+          <div style="display:flex;gap:8px;align-items:center;padding:8px 10px"><span class="ui-btn">Accept this change</span><span class="ui-btn ghost">Reject this change</span><span class="pin">1</span></div></div>
+      </div></div>
+        <figcaption><span class="pins"><span><span class="pin">1</span>Per-change buttons. Read each change, the same way you'd review a colleague's edit.</span></span></figcaption>
+      </figure>
+    </div></div>
+    <p class="note"><b>Using GitHub Copilot instead?</b> Copilot Chat in VS Code also lets you choose GPT or Claude models from its model menu, if your organisation already pays for Copilot.</p>
+  </div>
+
+  <!-- D GEMMA LOCAL -->
+  <div class="gpanel" data-gpanel="gemma" hidden>
+    <p>Claude Code is normally connected to Anthropic's Claude models. Ollama can stand in for Anthropic's service on your own computer, so Claude Code works with a free open model such as Google's <b>Gemma 4</b>. Nothing leaves your machine, and no account is needed.</p>
+    <div class="note warn"><span class="label">Before you start</span><b>About "Gemma 4 12B":</b> Ollama's Gemma 4 page currently lists the sizes <span class="inline-code">e2b</span>, <span class="inline-code">e4b</span>, <span class="inline-code">26b</span> and <span class="inline-code">31b</span>. A 12B version is reported in some guides but doesn't appear in the main list. The commands below use <span class="inline-code">gemma4:12b</span>. If Ollama says the model doesn't exist, open the <b>Tags</b> list on ollama.com/library/gemma4 and use the closest size that fits your computer (table below).<br><br><b>Set expectations:</b> a model that runs on a laptop is much weaker than Claude at multi-step coding. It works well for explaining code and writing short scripts. For bigger jobs, expect to guide it more.</div>
+    <div class="tbl-wrap"><table>
+      <tr><th>Tag</th><th>Approx. download</th><th>Computer needed (rough guide)</th></tr>
+      <tr><td><span class="inline-code">gemma4:e4b</span></td><td class="num">≈ 10 GB</td><td>16 GB RAM laptop or 8 GB graphics card</td></tr>
+      <tr><td><span class="inline-code">gemma4:12b</span> (if listed)</td><td class="num">≈ 7 GB (quantised)</td><td>12–16 GB graphics card</td></tr>
+      <tr><td><span class="inline-code">gemma4:26b</span></td><td class="num">≈ 16 GB+</td><td>24 GB graphics card, or 32 GB Apple-silicon Mac</td></tr>
+    </table></div>
+
+    <div class="gstep"><span class="n">1</span><div>
+      <h4>Install Ollama and download Gemma 4</h4>
+      <p>Install Ollama from <b>ollama.com</b> (Guide B1, step 1), then in a terminal:</p>
+      <div class="cmd"><div class="cmd-h"><span>Terminal</span><button class="btn copy" data-target="g7" type="button">Copy</button></div><pre id="g7">ollama --version
+ollama pull gemma4:12b
+ollama list</pre></div>
+    </div></div>
+
+    <div class="gstep"><span class="n">2</span><div>
+      <h4>Give the model a bigger memory (context length)</h4>
+      <p>Claude Code sends the model a lot of text: your files, instructions and its own notes. Ollama recommends a context length of <b>64k or higher</b>. If the Ollama app has a <b>Context length</b> slider in its settings, move it to 64k. Otherwise, set it with an environment variable and restart Ollama:</p>
+      <div class="cmd"><div class="cmd-h"><span>Windows PowerShell</span><button class="btn copy" data-target="g8" type="button">Copy</button></div><pre id="g8">setx OLLAMA_CONTEXT_LENGTH 65536
+<span class="c"># Quit Ollama from the tray icon, then start it again</span></pre></div>
+      <div class="cmd"><div class="cmd-h"><span>Mac / Linux</span><button class="btn copy" data-target="g9" type="button">Copy</button></div><pre id="g9">OLLAMA_CONTEXT_LENGTH=65536 ollama serve</pre></div>
+      <p>A bigger context uses more memory. If your computer struggles, try 32768.</p>
+    </div></div>
+
+    <div class="gstep"><span class="n">3</span><div>
+      <h4>Install Claude Code</h4>
+      <div class="cmd"><div class="cmd-h"><span>Windows PowerShell</span><button class="btn copy" data-target="g10" type="button">Copy</button></div><pre id="g10">irm https://claude.ai/install.ps1 | iex</pre></div>
+      <div class="cmd"><div class="cmd-h"><span>Mac / Linux</span><button class="btn copy" data-target="g11" type="button">Copy</button></div><pre id="g11">curl -fsSL https://claude.ai/install.sh | bash</pre></div>
+    </div></div>
+
+    <div class="gstep"><span class="n">4</span><div>
+      <h4>Easiest way: let Ollama launch it</h4>
+      <p>Go to your project folder and run one command. Ollama starts Claude Code already pointed at your local model.</p>
+      <div class="cmd"><div class="cmd-h"><span>Terminal</span><button class="btn copy" data-target="g12" type="button">Copy</button></div><pre id="g12">cd C:\Users\you\grievance-analysis
+ollama launch claude --model gemma4:12b</pre></div>
+      <figure class="shot"><div class="shot-scroll"><div class="term" style="min-width:560px">&gt; ollama launch claude --model gemma4:12b
+<span class="dim">Starting Claude Code with local model gemma4:12b …</span>
+
+ ✳ Claude Code
+   Model: <span class="ok">gemma4:12b</span>  (via http://localhost:11434)
+   cwd:   C:\Users\you\grievance-analysis
+
+&gt; Read grievances.csv and tell me how many rows and columns it has.
+<span class="dim">● Read(grievances.csv)</span>
+  The file has 72 rows and 6 columns: district, month, population_lakh,
+  received, resolved_30d, median_days.</div></div>
+        <figcaption>Check the model line shows your Gemma model, not a Claude model. Answers come from your computer, so speed depends on your hardware.</figcaption>
+      </figure>
+    </div></div>
+
+    <div class="gstep"><span class="n">5</span><div>
+      <h4>Manual way: point Claude Code at Ollama yourself</h4>
+      <p>If <span class="inline-code">ollama launch</span> isn't available in your version, set three environment variables and start Claude Code with the model name. The token value "ollama" is required but ignored, and the API key must be empty.</p>
+      <div class="cmd"><div class="cmd-h"><span>Windows PowerShell (this window only)</span><button class="btn copy" data-target="g13" type="button">Copy</button></div><pre id="g13">$env:ANTHROPIC_BASE_URL  = "http://localhost:11434"
+$env:ANTHROPIC_AUTH_TOKEN = "ollama"
+$env:ANTHROPIC_API_KEY    = ""
+claude --model gemma4:12b</pre></div>
+      <div class="cmd"><div class="cmd-h"><span>Mac / Linux (this window only)</span><button class="btn copy" data-target="g14" type="button">Copy</button></div><pre id="g14">export ANTHROPIC_BASE_URL=http://localhost:11434
+export ANTHROPIC_AUTH_TOKEN=ollama
+export ANTHROPIC_API_KEY=""
+claude --model gemma4:12b</pre></div>
+    </div></div>
+
+    <div class="gstep"><span class="n">6</span><div>
+      <h4>Make it permanent, and use it inside VS Code</h4>
+      <p>To avoid typing the variables every time, put them in Claude Code's settings file. The VS Code extension reads the same file. The file lives at <span class="inline-code">C:\Users\you\.claude\settings.json</span> (Windows) or <span class="inline-code">~/.claude/settings.json</span> (Mac/Linux). Create it if it doesn't exist.</p>
+      <div class="cmd"><div class="cmd-h"><span>~/.claude/settings.json</span><button class="btn copy" data-target="g15" type="button">Copy</button></div><pre id="g15">{
+  "model": "gemma4:12b",
+  "env": {
+    "ANTHROPIC_BASE_URL": "http://localhost:11434",
+    "ANTHROPIC_AUTH_TOKEN": "ollama",
+    "ANTHROPIC_API_KEY": ""
+  }
+}</pre></div>
+      <p>Then, in VS Code:</p>
+      <ol class="steps">
+        <li><div><b>Turn off the sign-in screen</b>Press <b>Ctrl+,</b> to open Settings, search <b>Claude Code login</b> and tick <b>Disable Login Prompt</b>. This tells the extension you're using another provider.</div></li>
+        <li><div><b>Reload VS Code</b>Run <b>Developer: Reload Window</b>, then click the Spark icon. The model name at the bottom of the prompt box should show your Gemma model.</div></li>
+        <li><div><b>Work as in Guide C2</b>Select code, use @-mentions, and review each proposed change.</div></li>
+      </ol>
+      <figure class="shot"><div class="shot-scroll"><div class="win">
+        <div class="win-bar"><i></i><i></i><i></i><span>Settings — Visual Studio Code</span></div>
+        <div style="padding:12px;display:flex;flex-direction:column;gap:10px">
+          <span class="ui-field">claude code login</span>
+          <div class="ui-row hl" style="border-radius:6px"><span class="ico">☑</span><span class="grow"><b>Claude Code: Disable Login Prompt</b><small>Skip authentication prompts (for third-party provider setups)</small></span><span class="pin">1</span></div>
+          <div class="promptbox"><span style="color:var(--ui-mute)">Ask Claude…</span><div class="foot"><span style="padding:2px 6px;border:1px solid var(--ui-line);border-radius:4px">Manual ▾</span><span class="hl" style="padding:2px 6px">gemma4:12b ▾</span><span class="pin">2</span></div></div>
+        </div></div></div>
+        <figcaption><span class="pins"><span><span class="pin">1</span>Tick this when using Ollama instead of an Anthropic account</span><span><span class="pin">2</span>The prompt box should show your local model</span></span></figcaption>
+      </figure>
+    </div></div>
+
+    <div class="tbl-wrap"><table>
+      <tr><th>Problem</th><th>Likely cause and fix</th></tr>
+      <tr><td>"Connection refused"</td><td>Ollama isn't running. Start the app or run <span class="inline-code">ollama serve</span>.</td></tr>
+      <tr><td>"Model not found"</td><td>The name must match <span class="inline-code">ollama list</span> exactly, including the tag after the colon.</td></tr>
+      <tr><td>Asks you to log in</td><td>Check that <span class="inline-code">ANTHROPIC_API_KEY</span> is empty and the base URL is set. In VS Code, tick Disable Login Prompt.</td></tr>
+      <tr><td>Model ignores files or can't use tools</td><td>Claude Code needs a model that supports tool calling. Gemma 4 does; very small models may struggle. Try a larger tag.</td></tr>
+      <tr><td>Forgets earlier instructions</td><td>The context is too small. Raise <span class="inline-code">OLLAMA_CONTEXT_LENGTH</span> (step 2).</td></tr>
+      <tr><td>Very slow</td><td>Use a smaller tag, close other programs, or keep tasks short.</td></tr>
+      <tr><td>Want Claude back</td><td>Remove the <span class="inline-code">env</span> block and <span class="inline-code">model</span> line from settings.json, untick Disable Login Prompt, and sign in again.</td></tr>
+    </table></div>
+  </div>
+
+  <div class="note warn"><span class="label">Before using any of these at work</span>Check which tools your department allows. Even with a local model, the rules in Chapter 12 still apply: keep personal data out of shared folders and record when AI helped.</div>
+  <div class="quiz" data-quiz="q13"></div>
+</section>
+
+<!-- PRACTICE -->
+<section class="chapter" id="practice" data-short="Practice exercises">
+  <span class="eyebrow">Chapter 15</span>
+  <h2>Practice exercises</h2>
+  <p>Four short tasks using the Chapter 10 sample data and ideas from this handbook. Try each one with your AI assistant first, then open the answer.</p>
+
+  <details class="scenario">
+    <summary><span class="tag">Exercise 1</span><b>Monsoon months only: which district has the highest grievances per lakh?</b></summary>
+    <div class="sc-body">
+      <p><b>Task.</b> Write a prompt asking for grievances per lakh population and % resolved within 30 days, for July and August 2025 only.</p>
+      <p><b>A good prompt includes:</b> the file and columns, "filter month to 2025-07 and 2025-08", "sum received and resolved_30d by district", "divide received by population_lakh", "sort highest first".</p>
+      <div class="finding">
+        <div><span class="label">Answer</span>Shivgarh: 14.6 per lakh in two months</div>
+        <div><span class="label">Resolution</span>Shivgarh 55.9%, the lowest of all</div>
+        <div><span class="label">Lowest rate</span>Nandpur: 9.2 per lakh</div>
+      </div>
+    </div>
+  </details>
+
+  <details class="scenario">
+    <summary><span class="tag">Exercise 2</span><b>Compare waiting times in two districts</b></summary>
+    <div class="sc-body">
+      <p><b>Task.</b> Is the typical wait in Shivgarh really longer than in Meenakshi Nagar? Use the 12 monthly <span class="inline-code">median_days</span> values for each. Which test should you ask for?</p>
+      <p><b>Answer.</b> It's a two-group comparison with only 12 values each and possibly skewed data, so a Mann–Whitney test is the safe choice (Chapter 05).</p>
+      <div class="finding">
+        <div><span class="label">Shivgarh</span>Median 33.5 days</div>
+        <div><span class="label">Meenakshi Nagar</span>Median 14 days</div>
+        <div><span class="label">Test</span>Mann–Whitney p &lt; 0.001: a real difference</div>
+      </div>
+    </div>
+  </details>
+
+  <details class="scenario">
+    <summary><span class="tag">Exercise 3</span><b>Spot the mistake</b></summary>
+    <div class="sc-body">
+      <p><b>Task.</b> An AI summary reads: <i>"Nandpur has the worst grievance problem, because it received the most complaints (1,590)."</i> What's wrong?</p>
+      <p><b>Answer.</b> It compares totals, not rates (Chapter 07). Nandpur is the largest district. Per lakh people it has the <b>lowest</b> grievance rate (41.4), and it resolves 82.7% on time. The district with the biggest problem is Shivgarh.</p>
+    </div>
+  </details>
+
+  <details class="scenario">
+    <summary><span class="tag">Exercise 4</span><b>Weight a survey result by hand</b></summary>
+    <div class="sc-body">
+      <p><b>Task.</b> A staff survey gets 300 replies from head office (80% satisfied) and 200 from field offices (45% satisfied). Field staff are 75% of the workforce. What's the weighted % satisfied?</p>
+      <p><b>Answer.</b> 0.25 × 80% + 0.75 × 45% = 20% + 33.75% = <b>about 54%</b>. The unweighted figure, (240 + 90) ÷ 500 = 66%, overstates satisfaction because head office replied more.</p>
+    </div>
+  </details>
+</section>
+
+<!-- CH9 -->
+<section class="chapter" id="reference">
+  <span class="eyebrow">Chapter 16 · Keep this handy</span>
+  <h2>Quick reference</h2>
+  <h3>The one-page workflow</h3>
+  <div class="tbl-wrap"><table>
+    <tr><th>Step</th><th>You do</th><th>Ask the AI</th></tr>
+    <tr><td>1. Prepare</td><td>Remove personal data; note column meanings</td><td>—</td></tr>
+    <tr><td>2. Clean</td><td>Run code, compare row counts</td><td>Template 1</td></tr>
+    <tr><td>3. Analyse</td><td>Run code, spot-check figures</td><td>Template 2</td></tr>
+    <tr><td>4. Visualise</td><td>Check axis, labels, counts</td><td>Template 3</td></tr>
+    <tr><td>5. Interpret</td><td>Add your department's context</td><td>"What does this mean…"</td></tr>
+    <tr><td>6. Verify</td><td>Complete the checklist; get a review</td><td>"What could be wrong with this?"</td></tr>
+  </table></div>
+
+  <h3>Useful follow-up phrases</h3>
+  <ul class="plain">
+    <li>"Explain that again as if I've never studied statistics."</li>
+    <li>"What assumptions did you make about my data?"</li>
+    <li>"What could make this result misleading?"</li>
+    <li>"Add a check that prints the number of rows before and after each step."</li>
+    <li>"Write a three-sentence summary for a minister's briefing note."</li>
+  </ul>
+
+  <h3>One-page cheat sheet</h3>
+  <p>Everything essential on one page. A printable PDF version is supplied alongside this handbook.</p>
+  <div class="sheet">
+    <div class="title"><b>AI for Statistical Analysis · Cheat sheet</b><span style="color:var(--muted)">Mahesh Divakaran</span></div>
+    <div><h4>The 5-step loop</h4><ul><li>Describe the data (columns, not records)</li><li>State one clear question</li><li>Ask for code + plain-English comments</li><li>Run it, compare row counts</li><li>Paste errors back; refine</li></ul></div>
+    <div><h4>Every prompt needs</h4><ul><li>Role: "Act as a patient analyst"</li><li>Context: department, audience</li><li>Data: file, columns, date format</li><li>Task: one specific job</li><li>Format: language, comments, output</li></ul></div>
+    <div><h4>Pick the method</h4><ul><li>Typical value → median</li><li>2 groups → t-test / Mann–Whitney</li><li>3+ groups → ANOVA / Kruskal–Wallis</li><li>Rates → chi-square</li><li>Together? → correlation</li><li>Over time → line chart</li></ul></div>
+    <div><h4>Read results</h4><ul><li>Mean vs median: both, always</li><li>Totals vs rates: "per what?"</li><li>Significant ≠ important</li><li>Correlation ≠ cause</li><li>Check n behind every figure</li></ul></div>
+    <div><h4>Catch AI mistakes</h4><ul><li>Rows dropped or doubled</li><li>Numbers in text not in output</li><li>DD/MM vs MM/DD dates</li><li>Wrong test for skewed data</li><li>% with no stated base</li></ul></div>
+    <div><h4>Surveys</h4><ul><li>Use the weight column</li><li>Likert: % per answer, not just mean</li><li>n = 400 → ±5 points</li><li>Suppress cells under 10</li><li>Report the response rate</li></ul></div>
+    <div><h4>Never share</h4><ul><li>Names, Aadhaar, phone, address</li><li>Health, welfare, tax records</li><li>Raw citizen files</li><li>API keys or passwords</li></ul></div>
+    <div><h4>Before you publish</h4><ul><li>Spot-check 3 figures by hand</li><li>Totals match the source</li><li>Colleague review</li><li>AI-use disclosure added</li></ul></div>
+  </div>
+
+  <h3>Glossary</h3>
+  <input class="gloss-search" id="glossQ" type="search" placeholder="Search terms, e.g. CSV, outlier, package" aria-label="Search glossary">
+  <dl class="gloss" id="gloss"></dl>
+
+  <div class="quiz" data-quiz="q7"></div>
+  <footer><b>Author:</b> Mahesh Divakaran, Google &amp; IBM Certified Data Science Professional, Research Scholar in Statistics, Amity University Lucknow.<br>This handbook offers general guidance. Your department's data-protection, records and AI-use policies always take priority. Examples are illustrative; names and figures are invented.</footer>
+</section>
+
+</div>
+</main>
+
+<textarea id="weData" hidden readonly>district,month,population_lakh,received,resolved_30d,median_days
+Nandpur,2025-04,38.4,124,100,16
+Nandpur,2025-05,38.4,130,114,12
+Nandpur,2025-06,38.4,130,108,16
+Nandpur,2025-07,38.4,171,133,21
+Nandpur,2025-08,38.4,184,141,19
+Nandpur,2025-09,38.4,158,133,15
+Nandpur,2025-10,38.4,115,94,13
+Nandpur,2025-11,38.4,116,98,16
+Nandpur,2025-12,38.4,101,88,15
+Nandpur,2026-01,38.4,113,93,15
+Nandpur,2026-02,38.4,124,105,14
+Nandpur,2026-03,38.4,124,108,14
+Kesavapuram,2025-04,21.7,93,73,13
+Kesavapuram,2025-05,21.7,88,75,17
+Kesavapuram,2025-06,21.7,104,84,13
+Kesavapuram,2025-07,21.7,131,99,21
+Kesavapuram,2025-08,21.7,129,90,20
+Kesavapuram,2025-09,21.7,102,82,14
+Kesavapuram,2025-10,21.7,99,77,13
+Kesavapuram,2025-11,21.7,96,82,14
+Kesavapuram,2025-12,21.7,74,60,14
+Kesavapuram,2026-01,21.7,79,65,11
+Kesavapuram,2026-02,21.7,97,81,17
+Kesavapuram,2026-03,21.7,95,78,14
+Rampur Kalan,2025-04,16.2,56,45,21
+Rampur Kalan,2025-05,16.2,52,39,20
+Rampur Kalan,2025-06,16.2,65,50,21
+Rampur Kalan,2025-07,16.2,70,55,29
+Rampur Kalan,2025-08,16.2,84,64,24
+Rampur Kalan,2025-09,16.2,64,49,18
+Rampur Kalan,2025-10,16.2,66,45,19
+Rampur Kalan,2025-11,16.2,67,52,27
+Rampur Kalan,2025-12,16.2,72,56,22
+Rampur Kalan,2026-01,16.2,53,42,21
+Rampur Kalan,2026-02,16.2,46,39,20
+Rampur Kalan,2026-03,16.2,53,40,21
+Shivgarh,2025-04,9.8,39,22,37
+Shivgarh,2025-05,9.8,43,27,32
+Shivgarh,2025-06,9.8,44,26,30
+Shivgarh,2025-07,9.8,79,45,41
+Shivgarh,2025-08,9.8,64,35,41
+Shivgarh,2025-09,9.8,48,27,31
+Shivgarh,2025-10,9.8,46,20,33
+Shivgarh,2025-11,9.8,39,25,33
+Shivgarh,2025-12,9.8,48,28,31
+Shivgarh,2026-01,9.8,46,24,35
+Shivgarh,2026-02,9.8,49,32,34
+Shivgarh,2026-03,9.8,44,26,34
+Meenakshi Nagar,2025-04,14.5,64,51,14
+Meenakshi Nagar,2025-05,14.5,52,48,14
+Meenakshi Nagar,2025-06,14.5,54,46,12
+Meenakshi Nagar,2025-07,14.5,80,60,20
+Meenakshi Nagar,2025-08,14.5,62,46,15
+Meenakshi Nagar,2025-09,14.5,62,50,18
+Meenakshi Nagar,2025-10,14.5,51,44,14
+Meenakshi Nagar,2025-11,14.5,60,53,11
+Meenakshi Nagar,2025-12,14.5,53,49,12
+Meenakshi Nagar,2026-01,14.5,50,41,12
+Meenakshi Nagar,2026-02,14.5,39,36,11
+Meenakshi Nagar,2026-03,14.5,41,35,16
+Bhavani Tal,2025-04,11.3,44,33,21
+Bhavani Tal,2025-05,11.3,58,46,27
+Bhavani Tal,2025-06,11.3,49,37,19
+Bhavani Tal,2025-07,11.3,67,49,28
+Bhavani Tal,2025-08,11.3,81,52,25
+Bhavani Tal,2025-09,11.3,50,37,24
+Bhavani Tal,2025-10,11.3,51,37,22
+Bhavani Tal,2025-11,11.3,40,30,24
+Bhavani Tal,2025-12,11.3,44,34,21
+Bhavani Tal,2026-01,11.3,50,32,22
+Bhavani Tal,2026-02,11.3,45,33,24
+Bhavani Tal,2026-03,11.3,51,38,21</textarea>
+<script>
+(function(){
+  const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+  const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+
+  /* theme */
+  const root=document.documentElement, tb=$('#themeBtn');
+  const isDark=()=>root.dataset.theme? root.dataset.theme==='dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+  const label=()=>tb.textContent=isDark()?'Switch to light':'Switch to dark';
+  const saved=store.get('hb-theme'); if(saved) root.dataset.theme=saved; label();
+  tb.onclick=()=>{root.dataset.theme=isDark()?'light':'dark';store.set('hb-theme',root.dataset.theme);label()};
+
+  /* mobile drawer */
+  const rail=$('#rail'), scrim=$('#scrim'), mb=$('#menuBtn');
+  const setOpen=o=>{rail.classList.toggle('open',o);scrim.hidden=!o;mb.setAttribute('aria-expanded',o)};
+  mb.onclick=()=>setOpen(!rail.classList.contains('open'));
+  scrim.onclick=()=>setOpen(false);
+  $$('#toc a').forEach(a=>a.addEventListener('click',()=>setOpen(false)));
+
+  /* progress + scrollspy */
+  const secs=$$('#toc a').map(a=>({a,el:document.querySelector(a.getAttribute('href'))}));
+  function onScroll(){
+    const h=document.documentElement, max=h.scrollHeight-innerHeight;
+    const p=max>0?Math.min(100,Math.round(scrollY/max*100)):0;
+    $('#progress').style.width=p+'%'; $('#readStat').textContent=p+'% read';
+    let cur=secs[0]; for(const s of secs){ if(s.el.getBoundingClientRect().top<160) cur=s; }
+    secs.forEach(s=>s.a.classList.toggle('active',s===cur));
+  }
+  addEventListener('scroll',onScroll,{passive:true}); onScroll();
+
+  /* copy */
+  $$('.copy').forEach(b=>b.addEventListener('click',()=>{
+    const el=document.getElementById(b.dataset.target);
+    const text=el.value!==undefined?el.value:el.innerText;
+    const done=()=>{const t=b.textContent;b.textContent='Copied';setTimeout(()=>b.textContent=t,1500)};
+    const fallback=()=>{const r=document.createRange();if(el.select)el.select();else{r.selectNodeContents(el);const s=getSelection();s.removeAllRanges();s.addRange(r)}b.textContent='Selected · press Ctrl+C';setTimeout(()=>b.textContent='Copy',2500)};
+    try{navigator.clipboard.writeText(text).then(done,fallback)}catch(e){fallback()}
+  }));
+
+  /* prompt builder */
+  const goals={
+    clean:'clean and tidy the data: remove duplicates, fix inconsistent spelling and spacing, convert dates, and report blank values without deleting them. Save a cleaned copy and leave the original untouched.',
+    summary:'produce a summary of the key numbers: counts, average and median for numeric columns, and the most common values for text columns.',
+    compare:'compare groups: show counts, average and median for each group, sort them, and tell me whether differences are likely to be real or due to chance, using a suitable test.',
+    trend:'show how things change over time: summarise by month, draw a clear line chart, and point out any unusual months.',
+    text:'find the main themes in the written comments: clean the text, show the most common words and short phrases, and group comments into a handful of themes with an example of each theme in my own words.'
+  };
+  function build(){
+    const lang=$('#b-lang').value, f=$('#b-file').value||'my_file.csv', aud=$('#b-aud').value||'my manager';
+    const cols=$('#b-cols').value.trim().split('\n').filter(Boolean).map(l=>'- '+l.trim()).join('\n');
+    $('#builtPrompt').value=`Act as a patient data analyst helping a government employee with no programming experience.
+
+I have a file called ${f}. The columns are:
+${cols}
+
+Please write ${lang} code to ${goals[$('#b-goal').value]}
+
+Add a plain-English comment above every line. Print the number of rows at each step so I can check nothing is lost.
+
+After the code:
+1. List any assumptions you made about my data.
+2. Explain what the output will show in language suitable for ${aud}.`;
+  }
+  ['#b-lang','#b-goal','#b-file','#b-aud','#b-cols'].forEach(s=>$(s).addEventListener('input',build)); build();
+
+  /* code explainer */
+  const code={
+    py:[
+      ['import pandas as pd','Load "pandas", a free toolkit that makes Python good with tables. Nickname it pd.'],
+      ['df = pd.read_csv("service_requests.csv")','Open the file and store the table under the name df (short for "data frame", a table).'],
+      ['print(len(df))','Show how many rows there are now, so we can compare later.'],
+      ['df = df.drop_duplicates()','Remove rows that are exact copies of another row.'],
+      ['df["district"] = df["district"].str.strip().str.title()','Tidy district names: cut extra spaces, then use Capital Letters, so "north " and "NORTH" both become "North".'],
+      ['df["date_received"] = pd.to_datetime(df["date_received"], errors="coerce")','Turn the date text into real dates. Anything unreadable becomes blank instead of crashing.'],
+      ['print(df.isna().sum())','Count the blank values in each column.'],
+      ['df.to_csv("service_requests_clean.csv", index=False)','Save the tidy table as a new file. The original stays untouched.']
+    ],
+    r:[
+      ['library(dplyr)','Load "dplyr", a free toolkit that makes R good with tables.'],
+      ['df <- read.csv("service_requests.csv")','Open the file and store the table as df. In R, <- means "store this as".'],
+      ['nrow(df)','Show how many rows there are now.'],
+      ['df <- distinct(df)','Remove rows that are exact copies of another row.'],
+      ['df$district <- tools::toTitleCase(tolower(trimws(df$district)))','Tidy district names: cut extra spaces, make lowercase, then Capitalise, so all spellings match.'],
+      ['df$date_received <- as.Date(df$date_received)','Turn the date text into real dates.'],
+      ['colSums(is.na(df))','Count the blank values in each column.'],
+      ['write.csv(df, "service_requests_clean.csv", row.names = FALSE)','Save the tidy table as a new file. The original stays untouched.']
+    ]
+  };
+  const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;');
+  function showCode(l){
+    $('#explainer').innerHTML=code[l].map(([c,s])=>`<div class="ex-row"><div class="ex-code">${esc(c)}</div><div class="ex-say">${s}</div></div>`).join('');
+    $$('.tab[data-lang]').forEach(t=>t.setAttribute('aria-selected',t.dataset.lang===l));
+  }
+  $$('.tab[data-lang]').forEach(t=>t.onclick=()=>showCode(t.dataset.lang)); showCode('py');
+
+  /* workspace tabs */
+  $$('#envTabs .tab').forEach(t=>t.onclick=()=>{
+    $$('#envTabs .tab').forEach(x=>x.setAttribute('aria-selected',x===t));
+    $$('.env-panel').forEach(p=>p.hidden=p.dataset.panel!==t.dataset.env);
+  });
+
+  /* API code builder */
+  const P={
+    claude:{name:'Claude',key:'ANTHROPIC_API_KEY',pip:'anthropic',
+      py:[['import anthropic','Load Anthropic\'s Python toolkit.'],
+          ['client = anthropic.Anthropic()','Connect to Claude. The key is read from the ANTHROPIC_API_KEY setting, so it never appears in your code.'],
+          ['reply = client.messages.create(model="claude-sonnet-5-5", max_tokens=800,','Send the question to a Claude model. max_tokens caps the reply length, which also caps the cost.'],
+          ['    messages=[{"role": "user", "content": prompt}])','The message itself, marked as coming from you (the "user").'],
+          ['print(reply.content[0].text)','Show the answer.']],
+      r:['chat <- chat_anthropic(model = "claude-sonnet-5-5")','Open a conversation with Claude. The key is read from ANTHROPIC_API_KEY in your .Renviron file.']},
+    gpt:{name:'GPT',key:'OPENAI_API_KEY',pip:'openai',
+      py:[['from openai import OpenAI','Load OpenAI\'s Python toolkit.'],
+          ['client = OpenAI()','Connect to OpenAI using the OPENAI_API_KEY setting.'],
+          ['reply = client.responses.create(model="<model-name>", input=prompt)','Send the question. Replace <model-name> with a current model from OpenAI\'s model list.'],
+          ['print(reply.output_text)','Show the answer.']],
+      r:['chat <- chat_openai()','Open a conversation with OpenAI\'s default model. The key is read from OPENAI_API_KEY.']},
+    gemini:{name:'Gemini',key:'GEMINI_API_KEY',pip:'google-genai',
+      py:[['from google import genai','Load Google\'s Gen AI toolkit.'],
+          ['client = genai.Client()','Connect to Gemini using the GEMINI_API_KEY setting.'],
+          ['reply = client.models.generate_content(model="<model-name>", contents=prompt)','Send the question. Replace <model-name> with a current Gemini model name.'],
+          ['print(reply.text)','Show the answer.']],
+      r:['chat <- chat_google_gemini()','Open a conversation with Gemini. The key is read from your environment (see ?chat_google_gemini for the exact name your version expects).']},
+    local:{name:'Ollama',key:null,pip:'ollama',
+      py:[['import ollama','Load the Ollama toolkit. The free Ollama app must be installed and running on your computer.'],
+          ['reply = ollama.chat(model="llama3.1",','Ask a model you downloaded earlier with "ollama pull llama3.1". No key needed.'],
+          ['    messages=[{"role": "user", "content": prompt}])','The message itself. It never leaves your computer.'],
+          ['print(reply["message"]["content"])','Show the answer.']],
+      r:['chat <- chat_ollama(model = "llama3.1")','Talk to a model running on your own computer. No key, and your data stays local.']}
+  };
+  let apiL='py', apiP='claude';
+  function api(){
+    const p=P[apiP];
+    let rows;
+    if(apiL==='py'){
+      rows=[['summary_text = summary_table.to_string()','Turn your results table into text. Only this summary is sent, not raw records.'],
+            ['prompt = "Explain this for a non-technical manager:\\n" + summary_text','Write the question and attach the summary.'],...p.py];
+    }else{
+      rows=[['library(ellmer)','Load ellmer, a free R package that talks to many AI models.'],p.r,
+            ['model <- lm(satisfaction ~ wait_days, data = survey)','An example analysis: does waiting time relate to satisfaction?'],
+            ['out <- paste(capture.output(summary(model)), collapse = "\\n")','Turn the printed result into text. Only the summary is sent, not the survey rows.'],
+            ['chat$chat(paste("Explain this for a non-technical manager:", out))','Ask for an interpretation. The chat remembers earlier questions, so you can follow up with chat$chat("What should I check next?").']];
+    }
+    $('#apiCode').innerHTML=rows.map(([c,s])=>`<div class="ex-row"><div class="ex-code">${esc(c)}</div><div class="ex-say">${esc(s)}</div></div>`).join('');
+    const install=apiL==='py'?`<code>pip install ${p.pip}</code>`:`<code>install.packages("ellmer")</code>`;
+    const key=p.key?(apiL==='py'?`Set <code>${p.key}</code> as an environment variable (see the table below).`:`Add <code>${p.key}=your-key</code> via <code>usethis::edit_r_environ()</code>, then restart R.`)
+      :`No key. Install Ollama from ollama.com, then run <code>ollama pull llama3.1</code> once.`;
+    $('#apiSetup').innerHTML=`<div><span class="label">1 · Install once</span>${install}</div><div><span class="label">2 · Connect</span>${key}</div><div><span class="label">3 · Run</span>Paste the code below into a notebook cell or script and run it.</div>`;
+  }
+  $$('#apiLang .tab').forEach(t=>t.onclick=()=>{apiL=t.dataset.v;$$('#apiLang .tab').forEach(x=>x.setAttribute('aria-selected',x===t));api()});
+  $$('#apiProv .tab').forEach(t=>t.onclick=()=>{apiP=t.dataset.v;$$('#apiProv .tab').forEach(x=>x.setAttribute('aria-selected',x===t));api()});
+  api();
+
+
+  /* decision helper */
+  const QT=[
+    {k:'Describe one measure',q:'What does a typical case look like?',ex:'How long does a pension application usually take?',sum:'Median, plus the 25th and 75th percentiles (the middle half of cases)',chart:'Histogram or box plot',test:'No test needed. This is description.',warn:'Look for extreme values that pull the average up.',p:'Describe the distribution of [column]: median, quartiles, minimum and maximum, and a histogram. Flag unusual values.'},
+    {k:'Compare two groups',q:'Is group A different from group B?',ex:'Do urban offices process applications faster than rural ones?',sum:'Median and count for each group',chart:'Two box plots side by side',test:'t-test if the data is roughly symmetric; Mann–Whitney test if it is skewed (waiting times usually are)',warn:'Unequal group sizes and skewed data. Report the size of the gap, not just the p-value.',p:'Compare [measure] between [group A] and [group B]. Check whether the data is skewed and choose a t-test or Mann–Whitney test accordingly. Report the difference in medians with a confidence interval.'},
+    {k:'Compare 3+ groups',q:'Do several groups differ?',ex:'Do the 12 districts differ in average processing time?',sum:'Median and count for each group, sorted',chart:'Sorted dot plot with intervals',test:'ANOVA, or Kruskal–Wallis for skewed data, followed by pairwise comparisons',warn:'With many groups, some will differ by chance. Ask for adjusted comparisons.',p:'Compare [measure] across all [groups]. Choose ANOVA or Kruskal–Wallis based on the data, then show which pairs differ using adjusted p-values.'},
+    {k:'Compare rates or %',q:'Does the share differ between groups?',ex:'Is the approval rate different across offices?',sum:'Percentage with the count behind it, e.g. 57% (337 of 589)',chart:'Sorted bar chart of percentages',test:'Chi-square test; Fisher\'s exact test if any group is small',warn:'Always show the base. A 100% rate from 3 cases means little.',p:'For each [group], calculate the % [outcome] with counts. Test whether the percentages differ using a chi-square test (or Fisher\'s exact if counts are small).'},
+    {k:'Relationship',q:'Do two measures move together?',ex:'Do districts with more staff per case resolve faster?',sum:'Correlation coefficient (from −1 to +1)',chart:'Scatter plot, one dot per unit',test:'Pearson correlation; Spearman if there are outliers or the pattern is curved',warn:'Correlation is not cause. A third factor may drive both.',p:'Show the relationship between [measure 1] and [measure 2] with a scatter plot and a correlation. Explain the strength in plain words and list other factors that could explain it.'},
+    {k:'Trend over time',q:'Is it going up or down?',ex:'Are complaints rising this year?',sum:'Monthly totals; change against the same month last year',chart:'Line chart',test:'Year-on-year comparison or a moving average; formal trend tests if needed',warn:'Seasonal patterns (monsoon, exam season, financial year-end) and changes in rules or recording.',p:'Summarise [measure] by month, draw a line chart, compare each month with the same month last year, and point out seasonal patterns or sudden jumps.'},
+    {k:'Several factors',q:'Which factors matter most?',ex:'What predicts citizen satisfaction once we account for district and waiting time?',sum:'Regression coefficients: the effect of each factor, holding the others steady',chart:'Coefficient plot with intervals',test:'Linear regression, or logistic regression for yes/no outcomes',warn:'Easy to over-interpret. Ask the AI to check assumptions, and involve a statistician before acting on it.',p:'Fit a regression explaining [outcome] using [factors]. Explain each coefficient in one plain sentence, check the main assumptions, and say what the model cannot tell us.'},
+    {k:'Written comments',q:'What are people saying?',ex:'What are the main complaints in 4,000 feedback comments?',sum:'Themes, with the count and % of comments in each',chart:'Bar chart of themes',test:'Theme coding (manual or AI-assisted) and word or phrase counts',warn:'Remove personal details first. Read a sample yourself to confirm the themes.',p:'Group the comments in [column] into 5–8 themes. For each theme give a short label, the number of comments, and a one-line description in your own words. Do not quote personal details.'}
+  ];
+  const qg=$('#qgrid');
+  qg.innerHTML=QT.map((t,i)=>`<button type="button" class="qbtn" aria-pressed="false" data-i="${i}"><b>${t.k}</b><br><span style="color:var(--muted)">${t.q}</span></button>`).join('');
+  function showQ(i){
+    const t=QT[i];
+    $$('#qgrid .qbtn').forEach(b=>b.setAttribute('aria-pressed',+b.dataset.i===i));
+    $('#qresult').innerHTML=`<div class="wide"><span class="label">Example question</span><h4>${t.ex}</h4></div>
+      <div><span class="label">Summarise with</span>${t.sum}</div>
+      <div><span class="label">Show it as</span>${t.chart}</div>
+      <div><span class="label">Method</span>${t.test}</div>
+      <div><span class="label">Watch out for</span>${t.warn}</div>
+      <div class="wide"><span class="label">Add to your prompt</span><pre id="qPrompt">${esc(t.p)}</pre><div style="margin-top:8px"><button class="btn" type="button" id="qCopy">Copy</button></div></div>`;
+    const b=$('#qCopy');
+    b.onclick=()=>{const done=()=>{b.textContent='Copied';setTimeout(()=>b.textContent='Copy',1500)};
+      try{navigator.clipboard.writeText(t.p).then(done,()=>{})}catch(e){}};
+  }
+  $$('#qgrid .qbtn').forEach(b=>b.onclick=()=>showQ(+b.dataset.i)); showQ(3);
+
+  /* worked example */
+  const raw=$('#weData').value.trim().split('\n'), hdr=raw[0].split(',');
+  const rows=raw.slice(1).map(l=>{const v=l.split(',');return {district:v[0],month:v[1],pop:+v[2],rec:+v[3],res:+v[4],md:+v[5]}});
+  $('#wePreview').innerHTML='<tr>'+hdr.map(h=>`<th>${h}</th>`).join('')+'</tr>'+raw.slice(1,6).map(l=>'<tr>'+l.split(',').map((v,i)=>`<td class="${i>1?'num':''}">${v}</td>`).join('')+'</tr>').join('')+`<tr><td colspan="6" style="color:var(--muted)">… ${rows.length-5} more rows</td></tr>`;
+  const med=a=>{const s=[...a].sort((x,y)=>x-y),n=s.length;return n%2?s[(n-1)/2]:(s[n/2-1]+s[n/2])/2};
+  const D={};
+  rows.forEach(r=>{const d=D[r.district]||(D[r.district]={name:r.district,pop:r.pop,rec:0,res:0,md:[]});d.rec+=r.rec;d.res+=r.res;d.md.push(r.md)});
+  const S=Object.values(D).map(d=>({...d,pl:d.rec/d.pop,pct:100*d.res/d.rec,mdm:med(d.md)})).sort((a,b)=>a.pct-b.pct);
+  const fmt=(n,d=0)=>n.toLocaleString('en-IN',{minimumFractionDigits:d,maximumFractionDigits:d});
+  $('#weTable').innerHTML='<tr><th>District</th><th class="num">Population (lakh)</th><th class="num">Received</th><th class="num">Per lakh</th><th class="num">% resolved ≤30 days</th><th class="num">Typical days</th></tr>'+
+    S.map(d=>`<tr class="${d.pct<65?'flag':''}"><td>${d.name}</td><td class="num">${fmt(d.pop,1)}</td><td class="num">${fmt(d.rec)}</td><td class="num">${fmt(d.pl,1)}</td><td class="num">${fmt(d.pct,1)}%</td><td class="num">${fmt(d.mdm,1)}</td></tr>`).join('');
+
+  (function bars(){
+    const W=680,H=300,L=40,R=10,T=20,B=50,ih=H-T-B,gw=(W-L-R)/S.length,y=v=>T+ih-(v/100)*ih;
+    let s='';
+    [0,25,50,75,100].forEach(v=>{s+=`<line x1="${L}" x2="${W-R}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)"/><text x="${L-6}" y="${y(v)+4}" text-anchor="end" font-size="11" fill="var(--muted)" font-family="var(--f-mono)">${v}</text>`});
+    S.forEach((d,i)=>{const x=L+i*gw, bw=(gw-28)/2;
+      [[d.pl,'var(--accent)'],[d.pct,'var(--bad)']].forEach(([v,c],j)=>{const bx=x+14+j*bw;
+        s+=`<rect x="${bx}" y="${y(v)}" width="${bw-2}" height="${y(0)-y(v)}" rx="2" fill="${c}"/><text x="${bx+(bw-2)/2}" y="${y(v)-5}" text-anchor="middle" font-size="11" fill="var(--ink)" font-family="var(--f-mono)">${Math.round(v)}</text>`});
+      const nm=d.name.split(' ');
+      nm.forEach((w,k)=>s+=`<text x="${x+gw/2}" y="${H-B+18+k*14}" text-anchor="middle" font-size="12" fill="var(--ink)" font-family="var(--f-body)" font-weight="${d.pct<65?700:400}">${w}</text>`);
+    });
+    $('#weBars').innerHTML=s;
+  })();
+
+  (function line(){
+    const M={};rows.forEach(r=>{const m=M[r.month]||(M[r.month]={rec:0,res:0});m.rec+=r.rec;m.res+=r.res});
+    const ks=Object.keys(M).sort(), mn=['Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec','Jan','Feb','Mar'];
+    const W=680,H=300,L=46,R=46,T=20,B=40,ih=H-T-B,iw=W-L-R,x=i=>L+i*iw/(ks.length-1);
+    const yL=v=>T+ih-(v/700)*ih, yR=v=>T+ih-(v/100)*ih;
+    let s='';
+    [0,175,350,525,700].forEach((v,k)=>{s+=`<line x1="${L}" x2="${W-R}" y1="${yL(v)}" y2="${yL(v)}" stroke="var(--line)"/><text x="${L-6}" y="${yL(v)+4}" text-anchor="end" font-size="11" fill="var(--accent)" font-family="var(--f-mono)">${v}</text><text x="${W-R+6}" y="${yL(v)+4}" font-size="11" fill="var(--warn)" font-family="var(--f-mono)">${k*25}%</text>`});
+    s+=`<rect x="${x(3)-10}" y="${T}" width="${x(4)-x(3)+20}" height="${ih}" fill="var(--warn-soft)" opacity=".7"/><text x="${(x(3)+x(4))/2}" y="${T+14}" text-anchor="middle" font-size="11" fill="var(--warn)" font-family="var(--f-mono)">monsoon</text>`;
+    const pts=f=>ks.map((k,i)=>`${x(i)},${f(M[k])}`).join(' ');
+    s+=`<polyline points="${pts(m=>yL(m.rec))}" fill="none" stroke="var(--accent)" stroke-width="2.5"/>`;
+    s+=`<polyline points="${pts(m=>yR(100*m.res/m.rec))}" fill="none" stroke="var(--warn)" stroke-width="2.5" stroke-dasharray="6 4"/>`;
+    ks.forEach((k,i)=>{const m=M[k];s+=`<circle cx="${x(i)}" cy="${yL(m.rec)}" r="3.5" fill="var(--accent)"/><circle cx="${x(i)}" cy="${yR(100*m.res/m.rec)}" r="3" fill="var(--warn)"/><text x="${x(i)}" y="${H-B+18}" text-anchor="middle" font-size="11" fill="var(--muted)" font-family="var(--f-mono)">${mn[i]}</text>`;
+      if(i===4) s+=`<text x="${x(i)+8}" y="${yL(m.rec)-6}" font-size="11" fill="var(--accent)" font-family="var(--f-mono)">${m.rec}</text>`});
+    $('#weLine').innerHTML=s;
+  })();
+
+  const WE={
+    py:[['import pandas as pd','Load the table toolkit.'],
+        ['from scipy.stats import chi2_contingency','Load the chi-square test from SciPy, a free statistics toolkit.'],
+        ['df = pd.read_csv("grievances.csv")','Open the file.'],
+        ['print(len(df))','Show the row count. It should be 72.'],
+        ['s = df.groupby("district").agg(','Group the rows by district and calculate, for each one:'],
+        ['    population=("population_lakh", "first"),','its population (the same every month, so take the first value),'],
+        ['    received=("received", "sum"), resolved=("resolved_30d", "sum"),','total grievances received and resolved within 30 days,'],
+        ['    typical_days=("median_days", "median"))','and the middle value of the 12 monthly medians.'],
+        ['s["per_lakh"] = (s.received / s.population).round(1)','Grievances per lakh people: a fair comparison across district sizes.'],
+        ['s["resolved_pct"] = (100 * s.resolved / s.received).round(1)','Percentage resolved within 30 days.'],
+        ['print(s.sort_values("resolved_pct"))','Show the table, worst-performing first.'],
+        ['chi2, p, dof, _ = chi2_contingency([s.resolved, s.received - s.resolved])','Test whether the share resolved on time differs across districts more than chance would explain.'],
+        ['print(round(chi2, 1), dof, p)','Show the test result: 189.7, 5, and a p-value far below 0.001.']],
+    r:[['library(dplyr)','Load the table toolkit.'],
+       ['df <- read.csv("grievances.csv")','Open the file.'],
+       ['nrow(df)','Show the row count. It should be 72.'],
+       ['s <- df |> group_by(district) |> summarise(','Group the rows by district and calculate, for each one:'],
+       ['  population = first(population_lakh),','its population,'],
+       ['  received = sum(received), resolved = sum(resolved_30d),','total grievances received and resolved within 30 days,'],
+       ['  typical_days = median(median_days)) |>','the middle value of the 12 monthly medians, then pass the result on.'],
+       ['  mutate(per_lakh = round(received / population, 1),','Add grievances per lakh people,'],
+       ['         resolved_pct = round(100 * resolved / received, 1)) |>','and the percentage resolved within 30 days.'],
+       ['  arrange(resolved_pct)','Sort worst-performing first.'],
+       ['print(s)','Show the table.'],
+       ['chisq.test(rbind(s$resolved, s$received - s$resolved))','Test whether the share resolved on time differs across districts. Gives X-squared = 189.7, df = 5, p < 0.001.']]
+  };
+  function showWE(l){$('#weCode').innerHTML=WE[l].map(([c,t])=>`<div class="ex-row"><div class="ex-code">${esc(c)}</div><div class="ex-say">${esc(t)}</div></div>`).join('');
+    $$('.tab[data-we]').forEach(t=>t.setAttribute('aria-selected',t.dataset.we===l))}
+  $$('.tab[data-we]').forEach(t=>t.onclick=()=>showWE(t.dataset.we)); showWE('py');
+
+  /* setup guide tabs */
+  $$('#guideTabs .tab').forEach(t=>t.onclick=()=>{
+    $$('#guideTabs .tab').forEach(x=>x.setAttribute('aria-selected',x===t));
+    $$('.gpanel').forEach(p=>p.hidden=p.dataset.gpanel!==t.dataset.guide);
+  });
+  /* mean vs median demo */
+  const base=[42,48,55,38,61,50];
+  const svg=$('#bars');
+  function demo(){
+    const g=+$('#outlier').value, vals=[...base,g], names='ABCDEFG'.split('');
+    const mean=vals.reduce((a,b)=>a+b,0)/vals.length, sorted=[...vals].sort((a,b)=>a-b), med=sorted[3];
+    $('#outVal').textContent='₹ '+g.toLocaleString('en-IN')+' k';
+    $('#meanV').textContent='₹ '+Math.round(mean)+' k'; $('#medV').textContent='₹ '+med+' k';
+    const max=Math.max(1500,...vals), H=170, top=14, left=8, w=640-left*2, bw=w/7;
+    const y=v=>top+H-(v/max)*H;
+    let s='';
+    vals.forEach((v,i)=>{const x=left+i*bw+10, bh=(v/max)*H;
+      s+=`<rect x="${x}" y="${y(v)}" width="${bw-20}" height="${Math.max(bh,1)}" rx="3" fill="${i===6?'var(--accent)':'var(--line)'}"/>`+
+         `<text x="${x+(bw-20)/2}" y="${top+H+20}" text-anchor="middle" font-size="13" fill="var(--muted)" font-family="var(--f-mono)">${names[i]}</text>`});
+    s+=`<line x1="${left}" x2="${640-left}" y1="${y(mean)}" y2="${y(mean)}" stroke="var(--bad)" stroke-width="2" stroke-dasharray="6 4"/>`+
+       `<text x="${640-left}" y="${y(mean)-6}" text-anchor="end" font-size="12" fill="var(--bad)" font-family="var(--f-mono)">mean</text>`+
+       `<line x1="${left}" x2="${640-left}" y1="${y(med)}" y2="${y(med)}" stroke="var(--good)" stroke-width="2"/>`+
+       `<text x="${left+4}" y="${y(med)-6}" font-size="12" fill="var(--good)" font-family="var(--f-mono)">median</text>`;
+    svg.innerHTML=s;
+    const above=vals.filter(v=>v>mean).length;
+    $('#demoSay').textContent = g<=80 ? 'With similar grants, the average and the median are almost the same.'
+      : `Only ${above} of 7 grants are above the average. The median still describes a typical grant; the average no longer does.`;
+  }
+  $('#outlier').addEventListener('input',demo); demo();
+
+  /* checklist */
+  const boxes=$$('#checklist input');
+  const score=()=>$('#checkScore').textContent=boxes.filter(b=>b.checked).length+' of '+boxes.length+' checked';
+  boxes.forEach(b=>{b.checked=store.get('hb-'+b.id)==='1';b.addEventListener('change',()=>{store.set('hb-'+b.id,b.checked?'1':'0');score()})}); score();
+
+  /* quizzes */
+  const Q={
+    q1:['An AI assistant gives you a confident answer about your data. What should you do?',['Use it, since AI is trained on huge amounts of data','Check it, because AI can be wrong while sounding sure','Ignore it, AI is unreliable'],1,'Treat it like a capable new colleague: useful, but you review the work before it goes anywhere.'],
+    q2:['What is your main role when using AI to write R or Python code?',['Memorise the commands','Editor: describe, run, question and check','Leave everything to the AI'],1,'You direct and check the work. The AI does the typing.'],
+    q3:['Your code shows an error message. What is the best next step?',['Start over with a different language','Paste the exact error back to the AI and ask what it means','Delete rows until it works'],1,'The full error message gives the AI exactly what it needs to fix the problem.'],
+    q4:['Average waiting time is 40 days but the median is 12. What does that suggest?',['Most people wait about 40 days','A few very long waits are pulling the average up','The data must be wrong'],1,'Half of people wait 12 days or less. A small number of extreme cases inflate the average.'],
+    q5:['In Case B, why did spending "per kilometre of road" change the conclusion?',['Totals ignore how much road each district must maintain','Kilometres are more accurate than money','The AI made an error'],0,'Bigger districts naturally get more money. Rates compare like with like.'],
+    q6:['Which of these is safe to paste into a public AI chat tool?',['A spreadsheet of benefit applicants','Column names plus three invented example rows','A summary table of 4 named households'],1,'Share the shape of the data, not real records. The AI can still write the code.'],
+    q9:['You want to know whether the % of applications approved differs across 5 offices. Which type of question is this?',['A trend over time','Comparing rates or percentages','A relationship between two measures'],1,'Comparing shares between groups calls for percentages with counts, and usually a chi-square test.'],
+    q10:['The output shows 72%, but the AI\'s written summary says satisfaction "rose to 75%". What happened?',['Normal rounding','The AI wrote a number that isn\'t in the output','The code must be wrong'],1,'Every number in the text must appear in the output. Tell the AI to quote only numbers you pasted.'],
+    q11:['Your survey file has a column called "multiplier". What should you tell the AI?',['Ignore it, it\'s administrative','It is the survey weight; use survey-aware methods','Average it with the other columns'],1,'Multipliers are survey weights. Without them, results over-represent whoever was easiest to survey.'],
+    q12:['Where does the method and AI-use note belong in a briefing note?',['In the first paragraph','At the end, briefly','Nowhere, it distracts'],1,'Findings go first for busy readers; the method and AI note go at the end so reviewers can check the work.'],
+    q13:['You connect Ollama in RStudio\'s Posit Assistant. Where does your data go?',['To Ollama\'s cloud servers','Nowhere: the model runs on your own computer','To Posit\'s servers'],1,'Ollama runs the model locally at localhost:11434. No key is needed and nothing leaves your machine.'],
+    q8:['Where should your API key be stored?',['Typed directly into the notebook code','In an environment setting such as .Renviron or a system variable','In a shared team document so everyone can use it'],1,'Keys are like passwords. Environment settings keep them out of your code, screenshots and shared files.'],
+    q7:['Before an AI-assisted result goes in a report, you should…',['Trust it if the code ran without errors','Check figures, verify assumptions and get a colleague review','Remove any mention that AI was used'],1,'Code that runs can still be wrong. Verification and transparency protect public trust.']
+  };
+  $$('.quiz').forEach(box=>{
+    const [q,opts,ans,why]=Q[box.dataset.quiz];
+    box.innerHTML=`<span class="label">Check your understanding</span><div class="q">${q}</div><div class="opts">${opts.map((o,i)=>`<button type="button" class="opt" data-i="${i}">${o}</button>`).join('')}</div><div class="fb" aria-live="polite"></div>`;
+    box.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{
+      box.querySelectorAll('.opt').forEach(x=>x.classList.remove('right','wrong'));
+      const ok=+b.dataset.i===ans; b.classList.add(ok?'right':'wrong');
+      if(!ok) box.querySelectorAll('.opt')[ans].classList.add('right');
+      box.querySelector('.fb').textContent=(ok?'Correct. ':'Not quite. ')+why;
+    });
+  });
+
+  /* glossary */
+  const G=[
+    ['AI assistant','A chat tool (such as ChatGPT or Claude) that answers questions and writes text or code from your instructions.'],
+    ['Prompt','The instruction you type to the AI.'],
+    ['Code / script','Written instructions for the computer. A script is a saved file of code.'],
+    ['R','A free programming language built for statistics.'],
+    ['Python','A free general-purpose programming language, widely used for data.'],
+    ['Package / library','An add-on toolkit for R or Python, like an app for your phone. pandas and dplyr are examples.'],
+    ['Data frame','A table of data inside R or Python: rows and columns, like a spreadsheet tab.'],
+    ['CSV','A simple spreadsheet file format: values separated by commas. Opens in Excel.'],
+    ['Variable / column','One type of information recorded for every row, such as district or date.'],
+    ['Missing value (NA)','A blank cell. R shows NA, Python shows NaN.'],
+    ['Outlier','A value far away from the rest, like one huge grant among small ones.'],
+    ['Mean','The average: total divided by count.'],
+    ['Median','The middle value when sorted.'],
+    ['Correlation','A measure of how closely two things move together. Not proof of cause.'],
+    ['p-value','How surprising a result would be if there were truly no difference. Below 0.05 usually counts as significant.'],
+    ['Confidence interval','A range likely to contain the true value.'],
+    ['Anonymise','Remove or change details so no individual can be identified.'],
+    ['Hallucination','When an AI states something false as if it were true, such as an invented statistic.'],
+    ['API','A service counter for software: your code sends a question to an AI provider and gets an answer back.'],
+    ['API key','A secret code that identifies you to an AI provider and tracks usage and billing. Treat it like a password.'],
+    ['Token','A small chunk of text (roughly ¾ of a word). AI providers measure and charge by tokens.'],
+    ['Extension','An add-on that gives an editor like VS Code or JupyterLab new features, such as an AI chat panel.'],
+    ['Local model','An AI model that runs on your own computer (for example through Ollama), so data does not leave the machine.'],
+    ['Environment variable','A setting stored by your computer or R session, used to keep secrets like API keys out of your code.'],
+    ['Survey weight','A number telling how many people in the population each respondent represents. Sometimes called a multiplier.'],
+    ['Likert scale','A rating question such as strongly disagree to strongly agree.'],
+    ['Margin of error','How far a survey estimate might be from the true value, usually at 95% confidence.'],
+    ['Chi-square test','A test of whether percentages or categories differ between groups more than chance would explain.'],
+    ['Per lakh','Per 1,00,000 people. A rate that allows fair comparison between areas of different size.'],
+    ['Suppression','Hiding results for very small groups to protect privacy and avoid unreliable figures.'],
+    ['Notebook','An online or desktop page where you paste code into boxes and run them one at a time.'],
+    ['Error message','The computer explaining why it couldn\'t follow your code. Paste it to the AI.']
+  ];
+  function gloss(q){q=(q||'').toLowerCase();
+    $('#gloss').innerHTML=G.filter(([t,d])=>(t+d).toLowerCase().includes(q)).map(([t,d])=>`<div><dt>${t}</dt><dd>${d}</dd></div>`).join('')||'<div><dt>No match</dt><dd>Try a shorter word.</dd></div>';}
+  $('#glossQ').addEventListener('input',e=>gloss(e.target.value)); gloss('');
+})();
+</script>
+
+</body></html>
